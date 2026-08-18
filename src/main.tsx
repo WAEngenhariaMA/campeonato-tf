@@ -1,19 +1,14 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
 import './index.css'
-import App from './App.tsx'
-import { AuthProvider } from './auth/AuthContext'
-import { ToastProvider } from './components/ui/Toast'
+import ConfigMissing from './ConfigMissing'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <BrowserRouter basename="/campeonato-tf">
-      <ToastProvider>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </ToastProvider>
-    </BrowserRouter>
-  </StrictMode>,
-)
+const root = createRoot(document.getElementById('root')!)
+
+// Checked here, before anything imports lib/firebase.ts — that module's top-level
+// getAuth()/getFirestore() calls throw synchronously on an empty apiKey, which would
+// otherwise crash the whole render to a blank page instead of showing a clear message.
+if (!import.meta.env.VITE_FIREBASE_API_KEY) {
+  root.render(<ConfigMissing />)
+} else {
+  import('./AppRoot').then(({ default: AppRoot }) => root.render(<AppRoot />))
+}
