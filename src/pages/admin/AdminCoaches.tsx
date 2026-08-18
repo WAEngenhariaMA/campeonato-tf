@@ -5,6 +5,7 @@ import { Input, Select } from '../../components/ui/Input'
 import { TableSkeleton } from '../../components/ui/Skeleton'
 import { subscribeTeams } from '../../data/teams'
 import { listAllCoaches } from '../../data/coaches'
+import { poll } from '../../lib/api'
 import type { Coach, Team } from '../../types'
 
 export default function AdminCoaches() {
@@ -15,11 +16,7 @@ export default function AdminCoaches() {
   const [teamFilter, setTeamFilter] = useState('')
 
   useEffect(() => subscribeTeams(setTeams), [])
-  useEffect(() => {
-    listAllCoaches()
-      .then(setCoaches)
-      .finally(() => setLoading(false))
-  }, [])
+  useEffect(() => poll(listAllCoaches, (list) => { setCoaches(list); setLoading(false) }), [])
 
   const teamsById = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams])
 

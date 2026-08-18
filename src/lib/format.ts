@@ -1,6 +1,6 @@
 type DateLike = Date | string | { toDate: () => Date } | null | undefined
 
-/** Firestore returns serverTimestamp() fields as Timestamp objects (not strings/Dates), so every
+/** A API retorna datas ISO (e este helper também aceita objetos compatíveis), então cada
  * formatter here has to unwrap those too — this is the one place that needs to know that. */
 function toDate(value: DateLike): Date | null {
   if (!value) return null
@@ -10,14 +10,14 @@ function toDate(value: DateLike): Date | null {
   return null
 }
 
-/** Formats a Date (Firestore Timestamp or ISO string also accepted) as DD/MM/AAAA. */
+/** Formats a Date (ISO string also accepted) as DD/MM/AAAA. */
 export function formatDate(value: DateLike): string {
   const d = toDate(value)
   if (!d) return '—'
   return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d)
 }
 
-/** Formats a Date (Firestore Timestamp or ISO string also accepted) as HH:mm. */
+/** Formats a Date (ISO string also accepted) as HH:mm. */
 export function formatTime(value: DateLike): string {
   const d = toDate(value)
   if (!d) return '—'

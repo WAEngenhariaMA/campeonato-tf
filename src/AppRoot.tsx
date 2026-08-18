@@ -5,11 +5,8 @@ import { AuthProvider } from './auth/AuthContext'
 import { ToastProvider } from './components/ui/Toast'
 
 /**
- * Split out from main.tsx on purpose: this is the first module to import AuthContext,
- * which imports lib/firebase.ts, whose top-level getAuth()/getFirestore() calls throw
- * synchronously when the Firebase env vars are empty (e.g. GitHub secrets not set yet).
- * main.tsx only imports this file after confirming the config is present, so a missing
- * config shows the ConfigMissing screen instead of crashing to a blank page.
+ * Carregado depois de confirmar a URL da API para que uma configuração ausente
+ * mostre a tela de orientação em vez de uma página em branco.
  */
 export default function AppRoot() {
   return (

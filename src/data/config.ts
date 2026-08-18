@@ -1,8 +1,6 @@
-import { doc, getDoc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
-import { db } from '../lib/firebase'
+import { api, poll } from '../lib/api'
 import type { ChampionshipConfig } from '../types'
 
-const CONFIG_DOC = doc(db, 'config', 'championship')
 
 export const DEFAULT_CONFIG: ChampionshipConfig = {
   name: 'CAMPEONATO 2026',
@@ -17,20 +15,13 @@ export const DEFAULT_CONFIG: ChampionshipConfig = {
 }
 
 export async function ensureConfig(): Promise<ChampionshipConfig> {
-  const snap = await getDoc(CONFIG_DOC)
-  if (!snap.exists()) {
-    await setDoc(CONFIG_DOC, DEFAULT_CONFIG)
-    return DEFAULT_CONFIG
-  }
-  return snap.data() as ChampionshipConfig
+  return api<ChampionshipConfig>('/config')
 }
 
 export function subscribeConfig(cb: (config: ChampionshipConfig) => void) {
-  return onSnapshot(CONFIG_DOC, (snap) => {
-    cb(snap.exists() ? (snap.data() as ChampionshipConfig) : DEFAULT_CONFIG)
-  })
+  return poll(ensureConfig, cb)
 }
 
 export async function updateConfig(patch: Partial<ChampionshipConfig>) {
-  await updateDoc(CONFIG_DOC, patch)
+  await api<ChampionshipConfig>('/config', { method: 'PATCH', body: JSON.stringify(patch) })
 }

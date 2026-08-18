@@ -8,7 +8,7 @@ import { Modal } from '../../components/ui/Modal'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { TableSkeleton } from '../../components/ui/Skeleton'
 import { useToast } from '../../components/ui/Toast'
-import { subscribeTeams, createTeam, updateTeam } from '../../data/teams'
+import { subscribeTeams, createTeam, removeTeam, resetTeamPassword, updateTeam } from '../../data/teams'
 import { subscribeRegistrations, deleteRegistration } from '../../data/representatives'
 import { subscribeConfig, DEFAULT_CONFIG } from '../../data/config'
 import type { ChampionshipConfig, RepresentativeRegistration, Team } from '../../types'
@@ -42,6 +42,14 @@ export default function AdminTeams() {
   const [form, setForm] = useState({ name: '', shortName: '', login: '', password: '' })
 
   const [detail, setDetail] = useState<Team | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editing, setEditing] = useState<Team | null>(null)
+  const [editForm, setEditForm] = useState({ name: '', shortName: '', login: '' })
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [passwordOpen, setPasswordOpen] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [savingPassword, setSavingPassword] = useState(false)
+  const [removeConfirm, setRemoveConfirm] = useState<Team | null>(null)
   const [resetConfirm, setResetConfirm] = useState<Team | null>(null)
   const [toggleConfirm, setToggleConfirm] = useState<Team | null>(null)
 
@@ -85,6 +93,60 @@ export default function AdminTeams() {
     await deleteRegistration(resetConfirm.id)
     toast.success('Cadastro de representantes reiniciado. O time pode enviar novamente.')
     setResetConfirm(null)
+  }
+
+  function openEdit(team: Team) {
+    setEditing(team)
+    setEditForm({ name: team.name, shortName: team.shortName, login: team.login })
+    setEditOpen(true)
+  }
+
+  async function handleEdit(e: FormEvent) {
+    e.preventDefault()
+    if (!editing) return
+    setSavingEdit(true)
+    try {
+      await updateTeam(editing.id, editForm)
+      toast.success('Dados do time atualizados.')
+      setEditOpen(false)
+      setDetail(null)
+    } catch {
+      toast.error('Não foi possível salvar. Verifique se o login já está em uso.')
+    } finally {
+      setSavingEdit(false)
+    }
+  }
+
+  async function handlePassword(e: FormEvent) {
+    e.preventDefault()
+    if (!detail) return
+    if (newPassword.length < 6) {
+      toast.error('A senha deve ter pelo menos 6 caracteres.')
+      return
+    }
+    setSavingPassword(true)
+    try {
+      await resetTeamPassword(detail.id, newPassword)
+      toast.success(`Senha de ${detail.name} redefinida.`)
+      setNewPassword('')
+      setPasswordOpen(false)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível redefinir a senha.')
+    } finally {
+      setSavingPassword(false)
+    }
+  }
+
+  async function handleRemoveTeam() {
+    if (!removeConfirm) return
+    try {
+      await removeTeam(removeConfirm.id)
+      toast.success(`${removeConfirm.name} foi removido.`)
+      setDetail(null)
+      setRemoveConfirm(null)
+    } catch {
+      toast.error('Não foi possível remover o time.')
+    }
   }
 
   return (
@@ -219,6 +281,12 @@ export default function AdminTeams() {
               </div>
             )}
             <div className="flex flex-wrap gap-2 border-t border-ink-100 pt-4">
+              <Button size="sm" variant="secondary" onClick={() => openEdit(detail)}>
+                EDITAR TIME
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => setPasswordOpen(true)}>
+                REDEFINIR SENHA
+              </Button>
               <Button size="sm" variant={detail.active ? 'danger' : 'primary'} onClick={() => setToggleConfirm(detail)}>
                 {detail.active ? 'BLOQUEAR ACESSO' : 'DESBLOQUEAR ACESSO'}
               </Button>
@@ -227,9 +295,46 @@ export default function AdminTeams() {
                   REDEFINIR CADASTRO DE REPRESENTANTES
                 </Button>
               )}
+              <Button size="sm" variant="danger" onClick={() => setRemoveConfirm(detail)}>
+                REMOVER TIME
+              </Button>
             </div>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        title={`EDITAR ${editing?.name ?? 'TIME'}`}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setEditOpen(false)}>CANCELAR</Button>
+            <Button onClick={() => (document.getElementById('edit-team-form') as HTMLFormElement | null)?.requestSubmit()} loading={savingEdit}>SALVAR</Button>
+          </>
+        }
+      >
+        <form id="edit-team-form" onSubmit={handleEdit} className="space-y-3">
+          <Input label="Nome oficial" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} required />
+          <Input label="Nome curto" value={editForm.shortName} onChange={(e) => setEditForm({ ...editForm, shortName: e.target.value })} required />
+          <Input label="Login" value={editForm.login} onChange={(e) => setEditForm({ ...editForm, login: e.target.value })} required />
+        </form>
+      </Modal>
+
+      <Modal
+        open={passwordOpen}
+        onClose={() => { setPasswordOpen(false); setNewPassword('') }}
+        title={`NOVA SENHA — ${detail?.name ?? ''}`}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => { setPasswordOpen(false); setNewPassword('') }}>CANCELAR</Button>
+            <Button onClick={() => (document.getElementById('reset-password-form') as HTMLFormElement | null)?.requestSubmit()} loading={savingPassword}>DEFINIR SENHA</Button>
+          </>
+        }
+      >
+        <form id="reset-password-form" onSubmit={handlePassword} className="space-y-3">
+          <Input label="Nova senha" type="text" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} hint="Mínimo 6 caracteres. A senha anterior não pode ser visualizada." required minLength={6} />
+        </form>
       </Modal>
 
       <ConfirmDialog
@@ -239,6 +344,17 @@ export default function AdminTeams() {
         danger={toggleConfirm?.active}
         onConfirm={handleToggleActive}
         onCancel={() => setToggleConfirm(null)}
+      />
+
+      <ConfirmDialog
+        open={!!removeConfirm}
+        title="REMOVER TIME"
+        message={`Isso remove ${removeConfirm?.name}, a conta de acesso, jogadores, técnicos e representantes vinculados. Digite REMOVER para confirmar.`}
+        confirmLabel="REMOVER DEFINITIVAMENTE"
+        danger
+        requirePhrase="REMOVER"
+        onConfirm={handleRemoveTeam}
+        onCancel={() => setRemoveConfirm(null)}
       />
 
       <ConfirmDialog

@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/Button'
 export default function AdminLogin() {
   const { role, signInAdmin } = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [login, setLogin] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -19,10 +19,10 @@ export default function AdminLogin() {
     setError('')
     setBusy(true)
     try {
-      await signInAdmin(email, password)
+      await signInAdmin(login, password)
       navigate('/admin')
     } catch {
-      setError('E-mail ou senha inválidos.')
+      setError('Login ou senha inválidos.')
     } finally {
       setBusy(false)
     }
@@ -36,7 +36,7 @@ export default function AdminLogin() {
           <h1 className="mt-3 text-xl font-extrabold text-white">ORGANIZAÇÃO</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl bg-white p-6 shadow-xl sm:p-8">
-          <Input label="E-mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" required />
+          <Input label="Login" value={login} onChange={(e) => setLogin(e.target.value)} autoComplete="username" required />
           <Input
             label="Senha"
             type="password"

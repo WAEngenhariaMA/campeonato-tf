@@ -1,67 +1,152 @@
-# Colocando no ar
+# Próximos passos — Neon + Drizzle
 
-Stack: **Vite + React + TypeScript + Tailwind** (site estático) + **Firebase** (Auth + Firestore + Storage), hospedado no **GitHub Pages** via GitHub Actions.
+Este projeto tem três partes: **Neon** guarda os dados, a **API** protege o banco e controla login/senha, e o **frontend** é o site publicado no GitHub Pages. O navegador não deve receber a `DATABASE_URL`.
 
-## 1. Criar o projeto Firebase
+## Checklist rápido
 
-1. [console.firebase.google.com](https://console.firebase.google.com) → **Adicionar projeto** (plano gratuito **Spark** é suficiente).
-2. **Build → Authentication → Sign-in method** → ative **E-mail/senha**.
-3. **Build → Firestore Database** → criar banco (modo produção, região `southamerica-east1` para ficar perto do Brasil).
-4. **Build → Storage** → criar bucket (mesma região).
-5. **Configurações do projeto → Geral → Seus apps → Web (`</>`)** → registre um app e copie o objeto `firebaseConfig`.
+1. Criar o projeto no Neon e copiar sua URL pooled.
+2. Criar `.env.local` com as credenciais locais.
+3. Aplicar as migrations para criar/atualizar as tabelas.
+4. Rodar API e frontend localmente e testar login do administrador.
+5. Publicar a API e configurar as variáveis de produção.
+6. Informar a URL pública da API ao GitHub Pages através de `VITE_API_URL`.
 
-## 2. Configurar o app localmente
+## 1. Criar o banco no Neon
 
-```bash
-cp .env.example .env.local
+1. Acesse [Neon Console](https://console.neon.tech) e clique em **New project**.
+2. Escolha PostgreSQL e uma região próxima do Brasil quando disponível.
+3. Em **Connect**, copie a connection string **pooled**.
+4. Guarde a URL como segredo. Ela começa com `postgresql://` e será usada somente pela API.
+
+## 2. Configurar localmente
+
+No PowerShell, dentro da pasta do projeto:
+
+```powershell
+Copy-Item .env.example .env.local
+npm install
 ```
 
-Preencha `.env.local` com os valores do `firebaseConfig` copiado acima. Esse arquivo é ignorado pelo git — nunca commitar.
+Abra `.env.local` e preencha assim:
 
-```bash
-npm install
+```dotenv
+DATABASE_URL=postgresql://... # URL pooled copiada do Neon
+JWT_SECRET=cole-uma-chave-aleatoria-longa
+ADMIN_LOGIN=organizacao
+ADMIN_PASSWORD=uma-senha-forte-inicial
+VITE_API_URL=http://localhost:3001/api
+```
+
+Para gerar `JWT_SECRET`:
+
+```powershell
+[Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Maximum 256 }))
+```
+
+`ADMIN_LOGIN` e `ADMIN_PASSWORD` são as credenciais iniciais da organização. Não há e-mail no login. Cada equipe também acessa com o login e a senha cadastrados pelo administrador.
+
+No painel **Times**, o administrador pode editar nome e login, bloquear/desbloquear o acesso, definir uma nova senha caso a equipe a esqueça e remover uma equipe. Senhas já cadastradas não são exibidas: o banco armazena somente o hash, portanto a ação correta é sempre **Redefinir senha**.
+
+## 3. Criar ou atualizar as tabelas
+
+Para um banco novo ou para aplicar as mudanças mais recentes:
+
+```powershell
+npm run db:migrate
+```
+
+O comando aplica, em ordem, tudo que está na pasta `drizzle/`, incluindo a mudança de `email` antigo para `username`. Ao terminar, o banco terá as tabelas `users`, `teams`, `players`, `coaches`, `registered_documents`, `representative_registrations`, `championship_config` e `audit_logs`.
+
+Para futuras mudanças de banco:
+
+```powershell
+# 1. altere server/db/schema.ts
+npm run db:generate
+# 2. confira o SQL gerado na pasta drizzle/
+npm run db:migrate
+```
+
+Não edite uma migration já aplicada em produção. Crie uma nova migration para cada alteração.
+
+## 4. Testar localmente
+
+Abra dois terminais na pasta do projeto.
+
+No primeiro, inicie a API:
+
+```powershell
+npm run dev:api
+```
+
+Ela deve mostrar `API em http://localhost:3001`. Na primeira inicialização, cria o usuário administrador a partir de `ADMIN_LOGIN` e `ADMIN_PASSWORD`.
+
+No segundo, inicie o site:
+
+```powershell
 npm run dev
 ```
 
-## 3. Publicar as regras de segurança
+Abra a URL exibida pelo Vite, acesse **Organização** e entre com o login/senha definidos no `.env.local`. Crie uma equipe em **Times** e confirme que ela consegue entrar na área de equipes com o login/senha informados no cadastro.
 
-As regras do Firestore/Storage (`firestore.rules`, `storage.rules`) SÃO a camada de segurança do sistema, já que não existe backend próprio. Publique-as com a [Firebase CLI](https://firebase.google.com/docs/cli):
+Validação final local:
 
-```bash
-npm install -g firebase-tools
-firebase login
-firebase use --add          # selecione o projeto criado no passo 1
-firebase deploy --only firestore:rules,firestore:indexes,storage
+```powershell
+npm run build
+npm run lint
 ```
 
-## 4. Criar o primeiro administrador
+## 5. Publicar a API
 
-Não existe autoelevação a admin dentro do app (de propósito — evita brecha de segurança). O primeiro admin é criado manualmente, uma única vez:
+Publique o repositório em um serviço que execute Node.js, como Railway, Render ou Fly.io. A API precisa usar o comando:
 
-1. **Authentication → Users → Add user** → informe um e-mail e senha reais (é esse e-mail que você vai usar para logar em `/admin/login`).
-2. Copie o **UID** gerado para esse usuário.
-3. **Firestore Database → Iniciar coleção** → coleção `admins`, documento com **ID = o UID copiado**, sem precisar de campos (documento vazio já basta — a regra só verifica se ele existe).
+```bash
+npm run start:api
+```
 
-Pronto — logue em `/admin/login` com esse e-mail/senha. A partir daí, o próprio painel cria os 10 times (nome, login, senha) em **Times → Novo Time**.
+Cadastre estas variáveis no serviço de API:
 
-## 5. Hospedar no GitHub Pages
+```dotenv
+DATABASE_URL=postgresql://...             # segredo: URL pooled do Neon
+JWT_SECRET=...                            # segredo: a mesma chave ou outra chave forte
+ADMIN_LOGIN=organizacao
+ADMIN_PASSWORD=...                        # segredo: usado só para criar o primeiro admin
+WEB_ORIGIN=https://SEU-USUARIO.github.io
+PORT=3001
+```
 
-1. No repositório do GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-2. **Settings → Secrets and variables → Actions → New repository secret**, adicione os 6 secrets abaixo (mesmos valores do `.env.local`):
-   - `VITE_FIREBASE_API_KEY`
-   - `VITE_FIREBASE_AUTH_DOMAIN`
-   - `VITE_FIREBASE_PROJECT_ID`
-   - `VITE_FIREBASE_STORAGE_BUCKET`
-   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
-   - `VITE_FIREBASE_APP_ID`
-3. Dê `git push` na branch `main` — o workflow `.github/workflows/deploy.yml` builda e publica automaticamente. O site fica em `https://<seu-usuário>.github.io/campeonato-tf/`.
+Depois de publicado, teste no navegador:
 
-> A `apiKey` do Firebase Web não é secreta por natureza (ela viaja pública em qualquer app Firebase) — quem protege os dados são as regras do passo 3, não o segredo do GitHub. Usar Secrets aqui é só organização, não é a barreira de segurança real.
+```text
+https://SUA-API.exemplo.com/api/health
+```
 
-## 6. Autorizar o domínio do GitHub Pages no Firebase Auth
+O resultado esperado é `{ "ok": true }`.
 
-**Authentication → Settings → Authorized domains** → adicione `<seu-usuário>.github.io` (senão o login trava em produção mesmo funcionando em `localhost`).
+> Após o administrador ser criado, remova `ADMIN_PASSWORD` da configuração de produção se desejar. A senha fica guardada somente como hash no PostgreSQL.
 
-## Limitação conhecida (documentada, não escondida)
+## 6. Publicar o frontend no GitHub Pages
 
-**Admin não consegue redefinir a senha de um time sozinho** sem um backend (o SDK cliente do Firebase só troca a senha de quem está logado no momento, não a de outra conta). Para a fase atual: se um time esquecer a senha, o próprio admin recria o login em **Times → Novo Time** com um login diferente, ou — quando entrarmos na próxima fase — isso vira uma Cloud Function (`adminResetTeamPassword`), que exige habilitar o plano pago Blaze (tem cota gratuita generosa, mas pede cartão cadastrado). Ver `src/data/teams.ts` / `src/lib/secondaryAuth.ts`.
+No GitHub do repositório:
+
+1. Vá em **Settings → Secrets and variables → Actions**.
+2. Crie o secret `VITE_API_URL`.
+3. Use a URL pública da API, terminando com `/api`. Exemplo: `https://SUA-API.exemplo.com/api`.
+4. Faça push na branch `main`.
+
+O workflow já faz o build e publica o site no GitHub Pages. A variável `WEB_ORIGIN` da API deve ser exatamente a origem do Pages, sem `/campeonato-tf` no final: `https://SEU-USUARIO.github.io`.
+
+## Segurança essencial
+
+- Nunca coloque `DATABASE_URL`, `JWT_SECRET` ou `ADMIN_PASSWORD` em `VITE_*`, código do frontend ou GitHub Pages.
+- Use o banco/branch **development** do Neon para testes; reserve a branch de produção para o site publicado.
+- Antes de mudanças de schema relevantes, faça backup/export no Neon.
+- O conector MCP do Neon no ChatGPT é opcional e deve apontar para desenvolvimento, não para o banco de produção ou dados reais.
+
+## Conector Neon no ChatGPT (opcional)
+
+1. No ChatGPT, abra **Settings → Connectors → Advanced Settings** e ative **Developer mode**.
+2. Adicione uma conexão MCP com `https://mcp.neon.tech/mcp`.
+3. Escolha OAuth e autorize a conta Neon.
+4. Habilite o conector na conversa antes de pedir consultas ou alterações de schema.
+
+Assim você pode pedir ao ChatGPT para listar projetos, inspecionar tabelas e orientar migrations no banco de desenvolvimento.

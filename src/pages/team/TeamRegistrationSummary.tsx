@@ -5,6 +5,7 @@ import { Card } from '../../components/ui/Card'
 import { Badge } from '../../components/ui/Badge'
 import { formatDate } from '../../lib/format'
 import { getRegistration } from '../../data/representatives'
+import { poll } from '../../lib/api'
 import type { RepresentativeRegistration } from '../../types'
 
 export default function TeamRegistrationSummary() {
@@ -13,7 +14,7 @@ export default function TeamRegistrationSummary() {
 
   useEffect(() => {
     if (!team) return
-    getRegistration(team.id).then(setRegistration)
+    return poll(() => getRegistration(team.id), setRegistration)
   }, [team])
 
   if (!team) return null

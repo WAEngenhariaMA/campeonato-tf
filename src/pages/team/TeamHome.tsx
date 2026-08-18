@@ -4,6 +4,7 @@ import { PageHeader } from '../../components/layout/PageHeader'
 import { StatCard } from '../../components/ui/Card'
 import { Badge } from '../../components/ui/Badge'
 import { getRegistration } from '../../data/representatives'
+import { poll } from '../../lib/api'
 import type { RepresentativeRegistration } from '../../types'
 
 const STATUS_TONE = { PENDENTE: 'warning', APROVADO: 'success', REJEITADO: 'danger' } as const
@@ -14,7 +15,7 @@ export default function TeamHome() {
 
   useEffect(() => {
     if (!team) return
-    getRegistration(team.id).then(setRegistration)
+    return poll(() => getRegistration(team.id), setRegistration)
   }, [team])
 
   if (!team) return null

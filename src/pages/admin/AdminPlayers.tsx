@@ -5,6 +5,7 @@ import { Input, Select } from '../../components/ui/Input'
 import { TableSkeleton } from '../../components/ui/Skeleton'
 import { subscribeTeams } from '../../data/teams'
 import { listAllPlayers } from '../../data/players'
+import { poll } from '../../lib/api'
 import type { Player, Team } from '../../types'
 
 export default function AdminPlayers() {
@@ -16,11 +17,7 @@ export default function AdminPlayers() {
   const [sortMode, setSortMode] = useState<'team' | 'name'>('team')
 
   useEffect(() => subscribeTeams(setTeams), [])
-  useEffect(() => {
-    listAllPlayers()
-      .then(setPlayers)
-      .finally(() => setLoading(false))
-  }, [])
+  useEffect(() => poll(listAllPlayers, (list) => { setPlayers(list); setLoading(false) }), [])
 
   const teamsById = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams])
 

@@ -5,6 +5,7 @@ import { Card } from '../../components/ui/Card'
 import { Badge } from '../../components/ui/Badge'
 import { TableSkeleton } from '../../components/ui/Skeleton'
 import { getRegistration } from '../../data/representatives'
+import { poll } from '../../lib/api'
 import type { RepresentativeRegistration } from '../../types'
 
 const STATUS_TONE = { PENDENTE: 'warning', APROVADO: 'success', REJEITADO: 'danger' } as const
@@ -16,7 +17,7 @@ export default function TeamRepresentatives() {
 
   useEffect(() => {
     if (!team) return
-    getRegistration(team.id).then((r) => {
+    return poll(() => getRegistration(team.id), (r) => {
       setRegistration(r)
       setLoading(false)
     })

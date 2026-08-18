@@ -1,5 +1,4 @@
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
-import { db } from '../lib/firebase'
+import { api } from '../lib/api'
 
 export async function logAction(params: {
   userId: string
@@ -10,14 +9,5 @@ export async function logAction(params: {
   oldValue?: unknown
   newValue?: unknown
 }) {
-  await addDoc(collection(db, 'auditLogs'), {
-    userId: params.userId,
-    userLabel: params.userLabel,
-    action: params.action,
-    entity: params.entity,
-    entityId: params.entityId,
-    oldValue: params.oldValue ?? null,
-    newValue: params.newValue ?? null,
-    createdAt: serverTimestamp(),
-  })
+  await api('/audit-logs', { method: 'POST', body: JSON.stringify(params) })
 }

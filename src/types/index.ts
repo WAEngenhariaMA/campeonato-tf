@@ -8,15 +8,14 @@ export interface Team {
   shortName: string
   shieldUrl: string | null
   login: string
-  /** Firebase Auth uid this team's login maps to, set once the account is provisioned. */
+  /** Legado de compatibilidade da interface; a autenticação agora é mantida na API. */
   authUid: string | null
   status: TeamStatus
   /** Seed 1-10, assigned by the official draw. Null until the draw is confirmed. */
   seed: number | null
   primaryColor: string | null
   secondaryColor: string | null
-  /** Denormalized counters, kept in sync transactionally on every player/coach create-delete
-   * so both the client and Firestore security rules can enforce the 20/2 limits cheaply. */
+  /** Contadores calculados pela API para a interface. */
   playerCount: number
   coachCount: number
   representativesSubmitted: boolean
