@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Campeonato 2026</title>
+    <script>
+      // GitHub Pages tem apenas hospedagem estática: uma rota como /equipes/login
+      // recarregada direto vira 404. O 404.html redireciona para cá guardando o
+      // caminho original numa query string; aqui a gente restaura o caminho antes
+      // do React Router montar. https://github.com/rafgraph/spa-github-pages
+      (function () {
+        var redirect = sessionStorage.redirect
+        delete sessionStorage.redirect
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, '', redirect)
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

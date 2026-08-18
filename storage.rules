@@ -1,0 +1,14 @@
+rules_version = '2';
+
+// Escudos dos times, logo do campeonato e PDFs gerados (súmulas, tabela oficial).
+// Leitura pública (são exibidos no site público); escrita só para admins,
+// verificado consultando o Firestore (mesma fonte de verdade das regras do Firestore).
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+        firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+  }
+}

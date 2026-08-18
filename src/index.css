@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Segoe UI', system-ui, Roboto, sans-serif;
+
+  --color-pitch-950: #04140d;
+  --color-pitch-900: #062617;
+  --color-pitch-800: #0a3a22;
+  --color-pitch-700: #0f4f2e;
+  --color-pitch-600: #14663b;
+  --color-pitch-500: #1a7d48;
+
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+
+  --color-gold-400: #fbbf24;
+  --color-gold-500: #f59e0b;
+
+  --color-ink-950: #0b0f14;
+  --color-ink-900: #10151c;
+  --color-ink-800: #171e28;
+  --color-ink-700: #202834;
+  --color-ink-600: #2c3646;
+  --color-ink-500: #3d4a5e;
+  --color-ink-400: #5a6b85;
+  --color-ink-300: #8493ac;
+  --color-ink-200: #c2cadb;
+  --color-ink-100: #e6eaf2;
+  --color-ink-50: #f5f7fb;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink-50);
+  color: var(--color-ink-900);
+}
+
+#root {
+  min-height: 100svh;
+}
+
+::selection {
+  background: var(--color-brand-400);
+  color: white;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+}

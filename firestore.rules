@@ -1,0 +1,161 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────────────────
+// CAMPEONATO 2026 — regras de acesso
+//
+// Não há backend próprio: o app estático (GitHub Pages) fala direto com o
+// Firestore, então estas regras SÃO a camada de segurança (equivalente ao
+// RLS que o Supabase daria de graça). Dois papéis:
+//   - admin: documento em /admins/{uid}. O primeiro admin é criado à mão
+//     no console do Firebase (ver SETUP.md) — não existe autoelevação.
+//   - time:  o id do documento em /teams/{uid} É o uid da conta desse time,
+//     então "é o dono deste time?" é só comparar request.auth.uid.
+// ─────────────────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isTeamOwner(teamId) {
+      return isSignedIn() && request.auth.uid == teamId;
+    }
+
+    function registrationsOpen() {
+      return get(/databases/$(database)/documents/config/championship).data.registrationsOpen == true;
+    }
+
+    function onlyAffects(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    // ── config: dados públicos do campeonato (nome, temporada, patrocinadores, trava de inscrição) ──
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── admins: só quem já é admin promove outro. Primeiro admin = console do Firebase. ──
+    match /admins/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // ── teams: elenco fixo de 10, criado só pelo admin. Leitura pública (nome/escudo/status). ──
+    match /teams/{teamId} {
+      allow read: if true;
+
+      allow create, delete: if isAdmin();
+
+      // time só pode mexer nos próprios contadores (mantidos pela transação de jogador/técnico);
+      // qualquer visitante pode virar a flag de "representantes enviados" de false -> true,
+      // porque o formulário público de representantes não tem login.
+      allow update: if isAdmin()
+        || (isTeamOwner(teamId) && onlyAffects(['playerCount', 'coachCount']))
+        || (onlyAffects(['representativesSubmitted'])
+            && resource.data.representativesSubmitted == false
+            && request.resource.data.representativesSubmitted == true);
+    }
+
+    // ── representativeRegistrations: doc id == teamId. Só a organização vê telefones. ──
+    match /representativeRegistrations/{teamId} {
+      allow read: if isAdmin() || isTeamOwner(teamId);
+
+      // cadastro público, sem login — só uma vez por time (impede reenvio/duplicidade).
+      allow create: if !exists(/databases/$(database)/documents/representativeRegistrations/$(teamId))
+        && exists(/databases/$(database)/documents/teams/$(teamId))
+        && request.resource.data.teamId == teamId
+        && request.resource.data.status == 'PENDENTE'
+        && request.resource.data.rep1Name is string && request.resource.data.rep1Name.size() > 0
+        && request.resource.data.rep1Phone is string && request.resource.data.rep1Phone.size() > 0
+        && request.resource.data.rep2Name is string && request.resource.data.rep2Name.size() > 0
+        && request.resource.data.rep2Phone is string && request.resource.data.rep2Phone.size() > 0;
+
+      allow update, delete: if isAdmin();
+    }
+
+    // ── documentIndex / coachDocumentIndex: guarda de unicidade entre os 10 times. ──
+    // "get" (doc específico) sim, para o time checar duplicidade antes de salvar;
+    // "list" não — ninguém varre o índice inteiro, só o admin via a coleção players/coaches.
+    match /documentIndex/{docId} {
+      allow get: if isSignedIn();
+      allow create: if isTeamOwner(request.resource.data.teamId) || isAdmin();
+      allow delete: if isAdmin() || isTeamOwner(resource.data.teamId);
+    }
+    match /coachDocumentIndex/{docId} {
+      allow get: if isSignedIn();
+      allow create: if isTeamOwner(request.resource.data.teamId) || isAdmin();
+      allow delete: if isAdmin() || isTeamOwner(resource.data.teamId);
+    }
+
+    // ── players: cada time só enxerga o próprio elenco; admin enxerga todos (relatórios/duplicidades). ──
+    match /players/{playerId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.teamId == request.auth.uid);
+
+      allow create: if isAdmin()
+        || (isTeamOwner(request.resource.data.teamId) && registrationsOpen());
+
+      allow update: if isAdmin()
+        || (isTeamOwner(resource.data.teamId) && registrationsOpen()
+            && onlyAffects(['fullName', 'active']));
+
+      allow delete: if isAdmin();
+    }
+
+    match /coaches/{coachId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.teamId == request.auth.uid);
+
+      allow create: if isAdmin()
+        || (isTeamOwner(request.resource.data.teamId) && registrationsOpen());
+
+      allow update: if isAdmin()
+        || (isTeamOwner(resource.data.teamId) && registrationsOpen()
+            && onlyAffects(['fullName', 'active']));
+
+      allow delete: if isAdmin();
+    }
+
+    // ── confrontos e súmula: leitura pública (calendário/resultados), escrita só do admin/arbitragem. ──
+    match /matches/{matchId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /goals/{goalId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.teamId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+    match /cards/{cardId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.teamId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+    match /matchReports/{matchId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── sorteio oficial: só o admin realiza; leitura pública depois de iniciado (para a tela de apresentação). ──
+    match /draws/{drawId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      match /positions/{position} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+
+    // ── auditoria: qualquer usuário autenticado registra a própria ação; só admin lê. ──
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+  }
+}
