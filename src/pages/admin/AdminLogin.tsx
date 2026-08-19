@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
 import { Input } from '../../components/ui/Input'
 import { Button } from '../../components/ui/Button'
+import { CHAMPIONSHIP_LOGO } from '../../lib/branding'
 
 export default function AdminLogin() {
   const { role, signInAdmin } = useAuth()
@@ -32,8 +33,9 @@ export default function AdminLogin() {
     <div className="flex min-h-svh items-center justify-center bg-ink-950 px-4">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
-          <p className="text-3xl">⚙️</p>
-          <h1 className="mt-3 text-xl font-extrabold text-white">ORGANIZAÇÃO</h1>
+          <img src={CHAMPIONSHIP_LOGO} alt="Copa Cohatrac TF" className="mx-auto h-20 w-20 rounded-2xl border border-gold-400/70 object-cover shadow-xl" />
+          <h1 className="championship-wordmark mt-3 text-xl font-extrabold text-white">ORGANIZAÇÃO</h1>
+          <p className="mt-1 text-xs font-bold tracking-wide text-gold-400">COPA COHATRAC TF 2026</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl bg-white p-6 shadow-xl sm:p-8">
           <Input label="Login" value={login} onChange={(e) => setLogin(e.target.value)} autoComplete="username" required />

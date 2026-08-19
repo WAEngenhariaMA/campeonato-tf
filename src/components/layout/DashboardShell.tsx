@@ -1,6 +1,7 @@
 import { type ReactNode, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import clsx from 'clsx'
+import { CHAMPIONSHIP_LOGO } from '../../lib/branding'
 
 export interface NavItem {
   label: string
@@ -47,25 +48,25 @@ export function DashboardShell({
   )
 
   const brand = (
-    <div className="flex items-center gap-3 px-5 py-5">
+    <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
       {shieldUrl ? (
-        <img src={shieldUrl} alt="" className="h-10 w-10 shrink-0 rounded-full bg-white object-contain p-1" />
+        <img src={shieldUrl ?? CHAMPIONSHIP_LOGO} alt="Logo da Copa Cohatrac TF" className="h-12 w-12 shrink-0 rounded-xl border border-gold-400/70 bg-pitch-950 object-contain p-0.5 shadow-lg" />
       ) : (
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-600 text-lg font-bold text-white">
           ⚽
         </div>
       )}
       <div className="min-w-0">
-        <p className="truncate text-sm font-bold text-white">{brandTitle}</p>
-        <p className="truncate text-xs text-ink-300">{brandSubtitle}</p>
+        <p className="championship-wordmark truncate text-sm font-extrabold text-white">{brandTitle}</p>
+        <p className="truncate text-xs text-gold-400">{brandSubtitle}</p>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-svh bg-ink-50 md:flex">
+    <div className="min-h-svh bg-[#f3f6fb] md:flex">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col bg-ink-950 md:flex">
+      <aside className="hidden w-64 shrink-0 flex-col bg-pitch-950 shadow-2xl md:flex">
         {brand}
         {nav}
         <div className="border-t border-ink-800 p-3">
@@ -79,14 +80,14 @@ export function DashboardShell({
       </aside>
 
       {/* Mobile top bar */}
-      <div className="flex items-center justify-between bg-ink-950 px-4 py-3 md:hidden">
+      <div className="flex items-center justify-between border-b border-gold-400/30 bg-pitch-950 px-4 py-3 md:hidden">
         <div className="flex items-center gap-2.5">
           {shieldUrl ? (
-            <img src={shieldUrl} alt="" className="h-8 w-8 rounded-full bg-white object-contain p-0.5" />
+            <img src={shieldUrl ?? CHAMPIONSHIP_LOGO} alt="Logo da Copa Cohatrac TF" className="h-9 w-9 rounded-lg border border-gold-400/70 bg-pitch-950 object-contain p-0.5" />
           ) : (
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-600 text-sm text-white">⚽</div>
           )}
-          <p className="text-sm font-bold text-white">{brandTitle}</p>
+          <p className="championship-wordmark text-sm font-extrabold text-white">{brandTitle}</p>
         </div>
         <button
           onClick={() => setMobileOpen(true)}
@@ -103,7 +104,7 @@ export function DashboardShell({
       {mobileOpen && (
         <div className="fixed inset-0 z-[80] md:hidden">
           <div className="absolute inset-0 bg-ink-950/60" onClick={() => setMobileOpen(false)} />
-          <div className="absolute inset-y-0 left-0 flex w-72 flex-col bg-ink-950 shadow-xl">
+          <div className="absolute inset-y-0 left-0 flex w-72 flex-col bg-pitch-950 shadow-xl">
             <div className="flex items-center justify-between pr-3">
               {brand}
               <button

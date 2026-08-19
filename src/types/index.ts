@@ -109,6 +109,22 @@ export interface Card {
   cardType: CardType
   minute: number
   reason: CardReason
+  suspensionMatches: number
+}
+
+export interface Standing {
+  position: number
+  teamId: string
+  teamName: string
+  games: number
+  wins: number
+  losses: number
+  goalsFor: number
+  goalsAgainst: number
+  goalDifference: number
+  yellowCards: number
+  redCards: number
+  situation: string
 }
 
 export interface MatchReport {

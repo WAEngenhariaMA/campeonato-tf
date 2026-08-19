@@ -25,7 +25,8 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   }
   const result = response.status === 204 ? undefined as T : await response.json() as T
   // Toda alteração bem-sucedida atualiza imediatamente as listas/totais já exibidos.
-  if ((options.method ?? 'GET').toUpperCase() !== 'GET') {
+  // Login/senha não alteram dados das telas e não podem disparar consultas antigas antes do novo token ser salvo.
+  if ((options.method ?? 'GET').toUpperCase() !== 'GET' && !path.startsWith('/auth/')) {
     window.localStorage.setItem(dataChangedStorageKey, String(Date.now()))
     window.dispatchEvent(new Event(dataChangedEvent))
   }

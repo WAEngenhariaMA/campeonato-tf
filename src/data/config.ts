@@ -3,9 +3,9 @@ import type { ChampionshipConfig } from '../types'
 
 
 export const DEFAULT_CONFIG: ChampionshipConfig = {
-  name: 'CAMPEONATO 2026',
+  name: 'COPA COHATRAC TF 2026',
   season: '2026',
-  logoUrl: null,
+  logoUrl: '/copa-cohatrac-tf.jpg',
   sponsors: [],
   registrationsOpen: true,
   playerLimit: 20,

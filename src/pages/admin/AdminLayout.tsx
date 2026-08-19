@@ -1,6 +1,7 @@
 import { Outlet, useNavigate } from 'react-router-dom'
 import { DashboardShell, type NavItem } from '../../components/layout/DashboardShell'
 import { useAuth } from '../../auth/AuthContext'
+import { CHAMPIONSHIP_LOGO } from '../../lib/branding'
 
 const NAV: NavItem[] = [
   { label: 'DASHBOARD', to: '/admin', end: true },
@@ -9,6 +10,10 @@ const NAV: NavItem[] = [
   { label: 'JOGADORES', to: '/admin/jogadores' },
   { label: 'TÉCNICOS', to: '/admin/tecnicos' },
   { label: 'DUPLICIDADES', to: '/admin/duplicidades' },
+  { label: 'CONFRONTOS', to: '/admin/confrontos' },
+  { label: 'RESULTADOS', to: '/admin/resultados' },
+  { label: 'CLASSIFICAÇÃO', to: '/admin/classificacao' },
+  { label: 'CHAVEAMENTO', to: '/admin/chaveamento' },
   { label: 'CONFIGURAÇÕES', to: '/admin/configuracoes' },
 ]
 
@@ -19,7 +24,8 @@ export default function AdminLayout() {
   return (
     <DashboardShell
       brandTitle="ORGANIZAÇÃO"
-      brandSubtitle="Painel administrativo"
+      brandSubtitle="Copa Cohatrac TF • 2026"
+      shieldUrl={CHAMPIONSHIP_LOGO}
       navItems={NAV}
       onLogout={async () => {
         await signOut()

@@ -9,6 +9,7 @@ import { maskPhoneBR } from '../../lib/format'
 import { Input, Select } from '../../components/ui/Input'
 import { Button } from '../../components/ui/Button'
 import { useToast } from '../../components/ui/Toast'
+import { CHAMPIONSHIP_LOGO } from '../../lib/branding'
 import type { Team } from '../../types'
 
 const schema = z.object({
@@ -73,7 +74,8 @@ export default function RepresentativeRegistration() {
     <div className="min-h-svh bg-ink-50 px-4 py-10 sm:py-16">
       <div className="mx-auto w-full max-w-lg">
         <div className="mb-6 text-center">
-          <p className="text-xs font-bold uppercase tracking-widest text-brand-600">Campeonato 2026</p>
+          <img src={CHAMPIONSHIP_LOGO} alt="Copa Cohatrac TF" className="mx-auto mb-3 h-16 w-16 rounded-xl border border-gold-400/70 object-cover" />
+          <p className="text-xs font-bold uppercase tracking-widest text-brand-600">Copa Cohatrac TF 2026</p>
           <h1 className="mt-1 text-2xl font-extrabold text-ink-900 sm:text-3xl">CADASTRO DE REPRESENTANTES</h1>
         </div>
 

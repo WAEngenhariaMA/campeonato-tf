@@ -1,4 +1,4 @@
-import { boolean, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { boolean, date, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 const createdAt = () => timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 
@@ -48,6 +48,30 @@ export const championshipConfig = pgTable('championship_config', {
   sponsors: jsonb('sponsors').notNull().default([]), registrationsOpen: boolean('registrations_open').notNull().default(true),
   playerLimit: integer('player_limit').notNull().default(20), coachLimit: integer('coach_limit').notNull().default(2),
   representativeLimit: integer('representative_limit').notNull().default(2), teamCount: integer('team_count').notNull().default(10),
+})
+
+/** As 11 partidas do chaveamento oficial, geradas e administradas pela organização. */
+export const matches = pgTable('matches', {
+  id: uuid('id').defaultRandom().primaryKey(), phase: text('phase').notNull(), matchNumber: text('match_number').notNull().unique(),
+  teamAId: uuid('team_a_id').references(() => teams.id), teamBId: uuid('team_b_id').references(() => teams.id),
+  matchDate: date('match_date'), matchTime: text('match_time'), goalsA: integer('goals_a').notNull().default(0), goalsB: integer('goals_b').notNull().default(0),
+  hadPenalties: boolean('had_penalties').notNull().default(false), penaltiesA: integer('penalties_a'), penaltiesB: integer('penalties_b'),
+  status: text('status').notNull().default('NAO_INICIADO'), winnerTeamId: uuid('winner_team_id').references(() => teams.id), createdAt: createdAt(),
+})
+
+export const goals = pgTable('goals', {
+  id: uuid('id').defaultRandom().primaryKey(), matchId: uuid('match_id').notNull().references(() => matches.id), teamId: uuid('team_id').notNull().references(() => teams.id),
+  playerId: uuid('player_id').notNull().references(() => players.id), minute: integer('minute').notNull(), period: text('period').notNull(), createdAt: createdAt(),
+})
+
+export const cards = pgTable('cards', {
+  id: uuid('id').defaultRandom().primaryKey(), matchId: uuid('match_id').notNull().references(() => matches.id), teamId: uuid('team_id').notNull().references(() => teams.id),
+  playerId: uuid('player_id').notNull().references(() => players.id), cardType: text('card_type').notNull(), minute: integer('minute').notNull(), reason: text('reason'), suspensionMatches: integer('suspension_matches').notNull().default(0), createdAt: createdAt(),
+})
+
+export const matchReports = pgTable('match_reports', {
+  matchId: uuid('match_id').primaryKey().references(() => matches.id), observations: text('observations').notNull().default(''),
+  finalized: boolean('finalized').notNull().default(false), finalizedAt: timestamp('finalized_at', { withTimezone: true }), updatedAt: createdAt(),
 })
 
 export const auditLogs = pgTable('audit_logs', {

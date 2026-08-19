@@ -68,6 +68,18 @@ npm run db:migrate
 
 Não edite uma migration já aplicada em produção. Crie uma nova migration para cada alteração.
 
+### Após atualizar o sistema
+
+Quando receber uma versão nova do código, execute sempre:
+
+```bash
+npm install
+npm run db:migrate
+npm run build
+```
+
+As migrations atuais também criam o histórico de gols, cartões e suspensões usado pelo painel **Resultados**, além do calendário, classificação e chaveamento dinâmicos.
+
 ## 4. Testar localmente
 
 Abra dois terminais na pasta do projeto.

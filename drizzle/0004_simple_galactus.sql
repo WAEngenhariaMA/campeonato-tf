@@ -1,0 +1,1 @@
+ALTER TABLE "cards" ADD COLUMN "suspension_matches" integer DEFAULT 0 NOT NULL;

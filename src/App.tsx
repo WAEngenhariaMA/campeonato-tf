@@ -1,5 +1,6 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Home from './pages/public/Home'
+import PublicTournamentPanel from './pages/public/PublicTournamentPanel'
 import RepresentativeRegistration from './pages/public/RepresentativeRegistration'
 import TeamLogin from './pages/team/TeamLogin'
 import TeamLayout from './pages/team/TeamLayout'
@@ -19,6 +20,10 @@ import AdminPlayers from './pages/admin/AdminPlayers'
 import AdminCoaches from './pages/admin/AdminCoaches'
 import AdminDuplicates from './pages/admin/AdminDuplicates'
 import AdminConfig from './pages/admin/AdminConfig'
+import AdminMatches from './pages/admin/AdminMatches'
+import AdminResults from './pages/admin/AdminResults'
+import AdminStandings from './pages/admin/AdminStandings'
+import AdminBracket from './pages/admin/AdminBracket'
 import { Protected } from './components/layout/Protected'
 
 export default function App() {
@@ -26,6 +31,10 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/representantes" element={<RepresentativeRegistration />} />
+      <Route path="/painel" element={<PublicTournamentPanel />} />
+      {/* Consolidado dentro do Painel do Campeonato — mantidos como redirecionamento para não quebrar links antigos. */}
+      <Route path="/classificacao" element={<Navigate to="/painel?tab=classificacao" replace />} />
+      <Route path="/chaveamento" element={<Navigate to="/painel?tab=jogos" replace />} />
 
       <Route path="/equipes/login" element={<TeamLogin />} />
       <Route
@@ -60,6 +69,10 @@ export default function App() {
         <Route path="jogadores" element={<AdminPlayers />} />
         <Route path="tecnicos" element={<AdminCoaches />} />
         <Route path="duplicidades" element={<AdminDuplicates />} />
+        <Route path="confrontos" element={<AdminMatches />} />
+        <Route path="resultados" element={<AdminResults />} />
+        <Route path="classificacao" element={<AdminStandings />} />
+        <Route path="chaveamento" element={<AdminBracket />} />
         <Route path="configuracoes" element={<AdminConfig />} />
       </Route>
 

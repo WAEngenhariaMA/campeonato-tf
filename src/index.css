@@ -1,24 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Segoe UI', system-ui, Roboto, sans-serif;
+  --font-sans: 'Arial Narrow', 'Segoe UI', system-ui, sans-serif;
 
-  --color-pitch-950: #04140d;
-  --color-pitch-900: #062617;
-  --color-pitch-800: #0a3a22;
-  --color-pitch-700: #0f4f2e;
-  --color-pitch-600: #14663b;
-  --color-pitch-500: #1a7d48;
+  --color-pitch-950: #020816;
+  --color-pitch-900: #04132d;
+  --color-pitch-800: #06265a;
+  --color-pitch-700: #083b83;
+  --color-pitch-600: #0752b5;
+  --color-pitch-500: #1472d4;
 
-  --color-brand-50: #ecfdf5;
-  --color-brand-100: #d1fae5;
-  --color-brand-400: #34d399;
-  --color-brand-500: #10b981;
-  --color-brand-600: #059669;
-  --color-brand-700: #047857;
+  --color-brand-50: #eaf3ff;
+  --color-brand-100: #d6e8ff;
+  --color-brand-400: #3b94f5;
+  --color-brand-500: #1472d4;
+  --color-brand-600: #0752b5;
+  --color-brand-700: #043b88;
 
-  --color-gold-400: #fbbf24;
-  --color-gold-500: #f59e0b;
+  --color-gold-400: #ffd52a;
+  --color-gold-500: #e5b400;
 
   --color-ink-950: #0b0f14;
   --color-ink-900: #10151c;
@@ -46,6 +46,15 @@ body {
   margin: 0;
   background: var(--color-ink-50);
   color: var(--color-ink-900);
+}
+
+.championship-wordmark {
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+
+.championship-glow {
+  box-shadow: 0 0 0 1px rgb(255 213 42 / 20%), 0 20px 60px rgb(0 63 150 / 35%);
 }
 
 #root {
