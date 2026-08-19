@@ -48,6 +48,9 @@ export const championshipConfig = pgTable('championship_config', {
   sponsors: jsonb('sponsors').notNull().default([]), registrationsOpen: boolean('registrations_open').notNull().default(true),
   playerLimit: integer('player_limit').notNull().default(20), coachLimit: integer('coach_limit').notNull().default(2),
   representativeLimit: integer('representative_limit').notNull().default(2), teamCount: integer('team_count').notNull().default(10),
+  /** Chave do sorteio oficial: a mesma chave + a mesma lista de times sempre reproduz o mesmo
+   * resultado, então qualquer pessoa pode reconferir depois que o sorteio não foi alterado. */
+  drawSeed: text('draw_seed'), drawTeamOrder: jsonb('draw_team_order'), drawConfirmedAt: timestamp('draw_confirmed_at', { withTimezone: true }),
 })
 
 /** As 11 partidas do chaveamento oficial, geradas e administradas pela organização. */

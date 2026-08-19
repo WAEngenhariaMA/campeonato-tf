@@ -24,6 +24,7 @@ import AdminMatches from './pages/admin/AdminMatches'
 import AdminResults from './pages/admin/AdminResults'
 import AdminStandings from './pages/admin/AdminStandings'
 import AdminBracket from './pages/admin/AdminBracket'
+import AdminDraw from './pages/admin/AdminDraw'
 import { Protected } from './components/layout/Protected'
 
 export default function App() {
@@ -73,6 +74,7 @@ export default function App() {
         <Route path="resultados" element={<AdminResults />} />
         <Route path="classificacao" element={<AdminStandings />} />
         <Route path="chaveamento" element={<AdminBracket />} />
+        <Route path="sorteio" element={<AdminDraw />} />
         <Route path="configuracoes" element={<AdminConfig />} />
       </Route>
 

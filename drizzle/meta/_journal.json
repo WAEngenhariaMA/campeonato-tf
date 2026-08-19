@@ -36,6 +36,13 @@
       "when": 1787099301610,
       "tag": "0004_simple_galactus",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787108074409,
+      "tag": "0005_parched_psylocke",
+      "breakpoints": true
     }
   ]
 }

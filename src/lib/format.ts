@@ -1,10 +1,23 @@
 type DateLike = Date | string | { toDate: () => Date } | null | undefined
 
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/
+
 /** A API retorna datas ISO (e este helper também aceita objetos compatíveis), então cada
- * formatter here has to unwrap those too — this is the one place that needs to know that. */
+ * formatter aqui também precisa desembrulhar isso — este é o único lugar que precisa saber disso.
+ *
+ * Uma string "YYYY-MM-DD" pura (sem hora) é interpretada pelo `Date` nativo como meia-noite UTC —
+ * em fuso negativo (Brasil, UTC-3) isso vira o dia anterior na hora de formatar. Datas de jogo
+ * (`match.date`) são só o dia, sem hora, então tratamos como data local em vez de UTC.
+ */
 function toDate(value: DateLike): Date | null {
   if (!value) return null
-  if (typeof value === 'string') return new Date(value)
+  if (typeof value === 'string') {
+    if (DATE_ONLY.test(value)) {
+      const [year, month, day] = value.split('-').map(Number)
+      return new Date(year, month - 1, day)
+    }
+    return new Date(value)
+  }
   if (value instanceof Date) return value
   if (typeof value === 'object' && 'toDate' in value) return value.toDate()
   return null

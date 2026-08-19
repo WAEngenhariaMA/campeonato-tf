@@ -69,3 +69,29 @@ body {
 .scrollbar-thin {
   scrollbar-width: thin;
 }
+
+/* Sorteio oficial: efeito de "embaralhando" enquanto o nome flica, e "pop" na revelação. */
+@keyframes draw-shuffle {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.96); opacity: 0.75; }
+}
+.animate-draw-shuffle {
+  animation: draw-shuffle 0.18s ease-in-out infinite;
+}
+
+@keyframes draw-reveal {
+  0% { transform: scale(0.55); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-draw-reveal {
+  animation: draw-reveal 0.5s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+
+@keyframes draw-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(255 213 42 / 45%); }
+  50% { box-shadow: 0 0 0 14px rgb(255 213 42 / 0%); }
+}
+.animate-draw-glow {
+  animation: draw-glow-pulse 1.6s ease-out infinite;
+}
