@@ -1,16 +1,18 @@
 import { Outlet, useNavigate } from 'react-router-dom'
+import { Home, Users, UserCog, Contact, GitBranch, ClipboardList, KeyRound } from 'lucide-react'
 import { DashboardShell, type NavItem } from '../../components/layout/DashboardShell'
 import { useAuth } from '../../auth/AuthContext'
 import { CHAMPIONSHIP_LOGO } from '../../lib/branding'
+import { resolveTeamShield } from '../../lib/teamAssets'
 
 const NAV: NavItem[] = [
-  { label: 'INÍCIO', to: '/equipes', end: true },
-  { label: 'JOGADORES', to: '/equipes/jogadores' },
-  { label: 'COMISSÃO TÉCNICA', to: '/equipes/comissao-tecnica' },
-  { label: 'REPRESENTANTES', to: '/equipes/representantes' },
-  { label: 'CONFRONTOS', to: '/equipes/confrontos' },
-  { label: 'MINHA INSCRIÇÃO', to: '/equipes/inscricao' },
-  { label: 'ALTERAR SENHA', to: '/equipes/senha' },
+  { label: 'INÍCIO', to: '/equipes', end: true, icon: Home },
+  { label: 'JOGADORES', to: '/equipes/jogadores', icon: Users },
+  { label: 'COMISSÃO TÉCNICA', to: '/equipes/comissao-tecnica', icon: UserCog },
+  { label: 'REPRESENTANTES', to: '/equipes/representantes', icon: Contact },
+  { label: 'CONFRONTOS', to: '/equipes/confrontos', icon: GitBranch },
+  { label: 'MINHA INSCRIÇÃO', to: '/equipes/inscricao', icon: ClipboardList },
+  { label: 'ALTERAR SENHA', to: '/equipes/senha', icon: KeyRound },
 ]
 
 export default function TeamLayout() {
@@ -21,7 +23,7 @@ export default function TeamLayout() {
     <DashboardShell
       brandTitle={team?.name ?? 'CARREGANDO...'}
       brandSubtitle="Copa Cohatrac TF • Equipe"
-      shieldUrl={team?.shieldUrl ?? CHAMPIONSHIP_LOGO}
+      shieldUrl={(team && resolveTeamShield(team)) ?? CHAMPIONSHIP_LOGO}
       navItems={NAV}
       onLogout={async () => {
         await signOut()

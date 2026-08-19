@@ -27,3 +27,18 @@ export type PublicEvent = { id: string; matchId: string; teamId: string; playerI
 export type MatchHistory = { matchId: string; goals: PublicEvent[]; cards: PublicEvent[] }
 export type DisciplinaryPlayer = { playerId: string; playerName: string; teamId: string; teamName: string; yellowCards: number; redCards: number; suspensionMatches: number }
 export async function getTournament() { const data = await api<{ matches: ApiMatch[]; standings: Standing[]; firstPhaseFinished: boolean; disciplinary: DisciplinaryPlayer[]; history: MatchHistory[] }>('/tournament'); return { ...data, matches: data.matches.map(toMatch).sort(byMatchNumber) } }
+
+export type Scorer = { playerId: string; playerName: string; teamId: string; teamName: string; goals: number }
+
+/** Agrega os gols de todas as partidas do histórico em um ranking de artilharia. */
+export function buildScorers(history: MatchHistory[]): Scorer[] {
+  const byPlayer = new Map<string, Scorer>()
+  for (const match of history) {
+    for (const goal of match.goals) {
+      const existing = byPlayer.get(goal.playerId)
+      if (existing) existing.goals += 1
+      else byPlayer.set(goal.playerId, { playerId: goal.playerId, playerName: goal.playerName, teamId: goal.teamId, teamName: goal.teamName, goals: 1 })
+    }
+  }
+  return [...byPlayer.values()].sort((a, b) => b.goals - a.goals || a.playerName.localeCompare(b.playerName))
+}
