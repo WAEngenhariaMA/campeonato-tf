@@ -1,27 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Shuffle, PartyPopper, RotateCcw, Trophy, Users, Dices, CalendarClock, Lock } from 'lucide-react'
+import {
+  Shuffle, PartyPopper, RotateCcw, Trophy, Users, Dices, CalendarClock, Lock,
+  KeyRound, Copy, ShieldCheck, CircleCheck, XCircle, RefreshCw,
+} from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
+import { Input } from '../../components/ui/Input'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { useToast } from '../../components/ui/Toast'
 import { TeamShield } from '../../components/public/TeamBadge'
 import { subscribeTeams } from '../../data/teams'
 import { subscribeMatches, createOfficialSchedule, updateMatch } from '../../data/matches'
-import { subscribeConfig, DEFAULT_CONFIG } from '../../data/config'
-import { formatDate } from '../../lib/format'
+import { subscribeConfig, updateConfig, DEFAULT_CONFIG } from '../../data/config'
+import { formatDate, formatDateTime } from '../../lib/format'
+import { seededShuffle, generateDrawSeed } from '../../lib/seededShuffle'
 import type { Match, Team, ChampionshipConfig } from '../../types'
 
-function shuffle<T>(list: T[]): T[] {
-  const arr = [...list]
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[arr[i], arr[j]] = [arr[j], arr[i]]
-  }
-  return arr
-}
-
 const byMatchNumber = (a: Match, b: Match) => Number(a.matchNumber.slice(1)) - Number(b.matchNumber.slice(1))
+const byId = (a: Team, b: Team) => a.id.localeCompare(b.id)
 
 export default function AdminDraw() {
   const toast = useToast()
@@ -48,6 +45,7 @@ export default function AdminDraw() {
   // ---- estado da cerimônia ----
   const [phase, setPhase] = useState<'idle' | 'drawing' | 'summary'>('idle')
   const orderRef = useRef<string[]>([])
+  const canonicalOrderRef = useRef<string[]>([])
   const [revealed, setRevealed] = useState<(string | null)[]>(Array(10).fill(null))
   const [shuffling, setShuffling] = useState(false)
   const [flashTeamId, setFlashTeamId] = useState<string | null>(null)
@@ -55,6 +53,10 @@ export default function AdminDraw() {
   const [redoConfirm, setRedoConfirm] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const shuffleTimer = useRef<number | null>(null)
+
+  // ---- chave do sorteio (prova de que não foi manipulado) ----
+  const [seed, setSeed] = useState(generateDrawSeed)
+  const [verifyResult, setVerifyResult] = useState<'ok' | 'mismatch' | null>(null)
 
   useEffect(() => () => { if (shuffleTimer.current) window.clearInterval(shuffleTimer.current) }, [])
 
@@ -71,9 +73,13 @@ export default function AdminDraw() {
   }
 
   function startDraw() {
-    orderRef.current = shuffle(activeTeams.map((t) => t.id))
+    // Ordem canônica (por id, sempre igual) + a chave definem o resultado inteiro — nada de
+    // Math.random() aqui. É isso que permite reconferir depois que ninguém alterou o sorteio.
+    canonicalOrderRef.current = [...activeTeams].sort(byId).map((t) => t.id)
+    orderRef.current = seededShuffle(canonicalOrderRef.current, seed)
     setRevealed(Array(10).fill(null))
     setJustPaired(false)
+    setVerifyResult(null)
     setPhase('drawing')
   }
 
@@ -125,7 +131,12 @@ export default function AdminDraw() {
       for (let i = 0; i < firstPhase.length; i++) {
         await updateMatch(firstPhase[i].id, { teamAId: revealed[i * 2], teamBId: revealed[i * 2 + 1] })
       }
-      toast.success('Sorteio confirmado! Os confrontos da primeira fase foram salvos.')
+      await updateConfig({
+        drawSeed: seed,
+        drawTeamOrder: canonicalOrderRef.current,
+        drawConfirmedAt: new Date().toISOString(),
+      })
+      toast.success('Sorteio confirmado! Os confrontos e a chave de conferência foram salvos.')
       setPhase('idle')
     } catch {
       toast.error('Não foi possível salvar o sorteio.')
@@ -139,11 +150,21 @@ export default function AdminDraw() {
       for (const match of firstPhase) {
         await updateMatch(match.id, { teamAId: null, teamBId: null })
       }
+      await updateConfig({ drawSeed: null, drawTeamOrder: null, drawConfirmedAt: null })
+      setSeed(generateDrawSeed())
+      setVerifyResult(null)
       toast.success('Sorteio anulado. Você pode sortear novamente.')
       setRedoConfirm(false)
     } catch {
       toast.error('Não foi possível anular o sorteio.')
     }
+  }
+
+  function runVerification() {
+    if (!config.drawSeed || !config.drawTeamOrder) return
+    const recomputed = seededShuffle(config.drawTeamOrder, config.drawSeed)
+    const matches = firstPhase.every((match, i) => match.teamAId === recomputed[i * 2] && match.teamBId === recomputed[i * 2 + 1])
+    setVerifyResult(matches ? 'ok' : 'mismatch')
   }
 
   return (
@@ -190,6 +211,47 @@ export default function AdminDraw() {
                 Um ou mais jogos já têm resultado lançado. Anule o resultado antes de refazer o sorteio.
               </p>
             )}
+
+            {config.drawSeed && (
+              <div className="mt-4 rounded-xl border border-ink-100 bg-ink-50 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <KeyRound size={16} className="text-brand-600" />
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-ink-400">Chave do sorteio</p>
+                      <p className="font-mono text-sm font-black text-pitch-950">{config.drawSeed}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => { navigator.clipboard?.writeText(config.drawSeed ?? ''); toast.success('Chave copiada.') }}
+                    >
+                      <Copy size={14} className="mr-1.5 inline" /> COPIAR
+                    </Button>
+                    <Button size="sm" onClick={runVerification}>
+                      <ShieldCheck size={14} className="mr-1.5 inline" /> VERIFICAR
+                    </Button>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-ink-500">
+                  A mesma chave, aplicada à mesma lista de {config.drawTeamOrder?.length ?? 0} times, sempre resulta exatamente
+                  nestes confrontos — é a prova de que o sorteio não foi alterado depois de confirmado.
+                  {config.drawConfirmedAt && ` Confirmado em ${formatDateTime(config.drawConfirmedAt)}.`}
+                </p>
+                {verifyResult === 'ok' && (
+                  <p className="mt-3 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-700">
+                    <CircleCheck size={16} /> Confere! O resultado atual bate exatamente com a chave salva.
+                  </p>
+                )}
+                {verifyResult === 'mismatch' && (
+                  <p className="mt-3 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-bold text-red-700">
+                    <XCircle size={16} /> Não confere — os confrontos atuais são diferentes do que a chave produz.
+                  </p>
+                )}
+              </div>
+            )}
           </Card>
           <DrawSummaryGrid matches={firstPhase} teamById={teamById} className="mt-4" />
         </div>
@@ -201,7 +263,28 @@ export default function AdminDraw() {
             <p className="mt-1 text-sm text-ink-500">
               As {config.teamCount} equipes serão sorteadas uma a uma, ao vivo, formando os jogos J1 a J5.
             </p>
-            <Button size="lg" className="mt-5" onClick={startDraw}>
+
+            <div className="mx-auto mt-5 max-w-sm text-left">
+              <label className="text-xs font-bold uppercase tracking-wide text-ink-400">Chave do sorteio</label>
+              <div className="mt-1.5 flex items-center gap-2">
+                <div className="relative flex-1">
+                  <KeyRound size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
+                  <Input
+                    value={seed}
+                    onChange={(e) => setSeed(e.target.value.toUpperCase())}
+                    className="pl-9 font-mono tracking-wider"
+                  />
+                </div>
+                <Button variant="secondary" size="sm" onClick={() => setSeed(generateDrawSeed())} title="Gerar nova chave aleatória">
+                  <RefreshCw size={15} />
+                </Button>
+              </div>
+              <p className="mt-1.5 text-[11px] text-ink-400">
+                A mesma chave sempre produz o mesmo sorteio — troque-a para sortear diferente, ou guarde-a como prova pública do resultado.
+              </p>
+            </div>
+
+            <Button size="lg" className="mt-5" onClick={startDraw} disabled={!seed.trim()}>
               <Shuffle size={18} className="mr-2 inline" /> INICIAR SORTEIO
             </Button>
           </Card>
@@ -236,6 +319,9 @@ export default function AdminDraw() {
             <PartyPopper className="text-gold-500" size={30} />
             <h2 className="text-xl font-black text-pitch-950">SORTEIO CONCLUÍDO!</h2>
             <p className="text-sm text-ink-500">Confira os confrontos antes de confirmar oficialmente.</p>
+            <p className="mt-1 flex items-center gap-1.5 rounded-full bg-ink-50 px-3 py-1 font-mono text-xs font-bold text-ink-500">
+              <KeyRound size={12} /> {seed}
+            </p>
             <div className="mt-3 flex gap-2">
               <Button variant="secondary" onClick={discardDraw}>
                 <RotateCcw size={15} className="mr-1.5 inline" /> REFAZER

@@ -177,4 +177,9 @@ export interface ChampionshipConfig {
   coachLimit: number
   representativeLimit: number
   teamCount: number
+  /** Chave do sorteio oficial: a mesma chave + a mesma lista de times (drawTeamOrder) sempre
+   * reproduz o mesmo resultado — permite qualquer pessoa reconferir que não foi alterado. */
+  drawSeed: string | null
+  drawTeamOrder: string[] | null
+  drawConfirmedAt: string | null
 }

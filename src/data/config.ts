@@ -12,6 +12,9 @@ export const DEFAULT_CONFIG: ChampionshipConfig = {
   coachLimit: 2,
   representativeLimit: 2,
   teamCount: 10,
+  drawSeed: null,
+  drawTeamOrder: null,
+  drawConfirmedAt: null,
 }
 
 export async function ensureConfig(): Promise<ChampionshipConfig> {
