@@ -40,11 +40,13 @@ export default function TeamRepresentatives() {
                 <p className="mt-1 text-sm font-semibold text-ink-900">{registration.rep1Name}</p>
                 <p className="text-sm text-ink-500">{registration.rep1Phone}</p>
               </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-ink-400">Representante 2</p>
-                <p className="mt-1 text-sm font-semibold text-ink-900">{registration.rep2Name}</p>
-                <p className="text-sm text-ink-500">{registration.rep2Phone}</p>
-              </div>
+              {registration.rep2Name && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-400">Representante 2</p>
+                  <p className="mt-1 text-sm font-semibold text-ink-900">{registration.rep2Name}</p>
+                  <p className="text-sm text-ink-500">{registration.rep2Phone}</p>
+                </div>
+              )}
             </div>
           </div>
         )}

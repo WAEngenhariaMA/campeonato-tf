@@ -73,8 +73,8 @@ export default function AdminRepresentatives() {
                     <td className="px-5 py-3 font-semibold text-ink-900">{teamsById.get(r.teamId)?.name ?? r.teamId}</td>
                     <td className="px-5 py-3 text-ink-500">{r.rep1Name}</td>
                     <td className="px-5 py-3 text-ink-500">{r.rep1Phone}</td>
-                    <td className="px-5 py-3 text-ink-500">{r.rep2Name}</td>
-                    <td className="px-5 py-3 text-ink-500">{r.rep2Phone}</td>
+                    <td className="px-5 py-3 text-ink-500">{r.rep2Name || '—'}</td>
+                    <td className="px-5 py-3 text-ink-500">{r.rep2Phone || '—'}</td>
                     <td className="px-5 py-3 text-ink-500">{formatDate(r.createdAt)}</td>
                     <td className="px-5 py-3">
                       <Badge tone={STATUS_TONE[r.status]}>{r.status}</Badge>

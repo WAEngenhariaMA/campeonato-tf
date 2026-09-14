@@ -16,8 +16,9 @@ const schema = z.object({
   teamId: z.string().min(1, 'Selecione o time.'),
   rep1Name: z.string().trim().min(3, 'Informe o nome completo.'),
   rep1Phone: z.string().min(14, 'Informe um telefone válido.'),
-  rep2Name: z.string().trim().min(3, 'Informe o nome completo.'),
-  rep2Phone: z.string().min(14, 'Informe um telefone válido.'),
+  // Representante 2 é opcional — só valida o formato quando o time escolhe preencher.
+  rep2Name: z.string().trim().refine((v) => v.length === 0 || v.length >= 3, 'Informe o nome completo ou deixe em branco.'),
+  rep2Phone: z.string().refine((v) => v.length === 0 || v.length >= 14, 'Informe um telefone válido ou deixe em branco.'),
 })
 type FormValues = z.infer<typeof schema>
 
@@ -125,7 +126,9 @@ export default function RepresentativeRegistration() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-sm font-bold uppercase tracking-wide text-ink-400">Representante 2</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wide text-ink-400">
+              Representante 2 <span className="font-medium normal-case text-ink-400">(opcional)</span>
+            </h2>
             <Input label="Nome completo" placeholder="Nome completo" error={errors.rep2Name?.message} {...register('rep2Name')} />
             <Controller
               control={control}
