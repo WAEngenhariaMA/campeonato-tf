@@ -6,13 +6,15 @@ const BASE = `${import.meta.env.BASE_URL}escudos/`
 const SHIELD_FILES: Record<string, string> = {
   valafc: 'vala-fc.png',
   vila: 'vila.png',
-  plazafc: 'plaza-fc.png',
+  alvoracadosfc: 'alvoraçados-fc.png',
   criadoscomvo: 'criados-com-vo.png',
   futcanafc: 'fut_cana-fc.png',
   nacionalfc: 'nacional-fc.png',
   pinheiro: 'pinheiro.png',
   pinheiroatleticoclube: 'pinheiro.png',
   realbets: 'real-bets.png',
+  athleticocohatrac: 'athletico-cohatrac.jpg',
+  tottenham: 'tottenham.png',
 }
 
 /** minúsculas, sem acento, só [a-z0-9] — mesma normalização usada nas duas pontas da comparação. */
