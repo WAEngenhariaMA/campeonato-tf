@@ -5,26 +5,32 @@ export type RankingEntry = {
   lostOnPenalties: boolean
   goalsFor: number
   goalsAgainst: number
-  yellowCards: number
   redCards: number
+  yellowCards: number
+  fouls: number
 }
 
+/**
+ * Critérios oficiais de desempate (2º ao 7º da tabela — o 1º e o 8º dependem de vitória/derrota
+ * e são aplicados por calculateWinnerRanking/calculateLoserRanking; pênaltis nunca entram aqui).
+ */
 const byStats = (a: RankingEntry, b: RankingEntry) =>
-  (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst)
-  || b.goalsFor - a.goalsFor
-  || a.goalsAgainst - b.goalsAgainst
-  || a.redCards - b.redCards
-  || a.yellowCards - b.yellowCards
-  || a.teamName.localeCompare(b.teamName)
+  (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst) // 2º maior saldo de gols
+  || b.goalsFor - a.goalsFor // 3º maior número de gols marcados
+  || a.goalsAgainst - b.goalsAgainst // 4º menor número de gols sofridos
+  || a.redCards - b.redCards // 5º menor número de cartões vermelhos
+  || a.yellowCards - b.yellowCards // 6º menor número de cartões amarelos
+  || a.fouls - b.fouls // 7º menor número de faltas
+  || a.teamName.localeCompare(b.teamName) // 8º sorteio da organização (aplicado manualmente em empate absoluto)
 
-/** Vencedores: tempo normal vence desempate com pênaltis; pênaltis nunca alteram gols/saldo. */
+/** Vencedores: 1º vitória no tempo normal > vitória nos pênaltis; pênaltis nunca alteram gols/saldo. */
 export function calculateWinnerRanking(entries: RankingEntry[]) {
   return [...entries].sort((a, b) => Number(a.wonOnPenalties) - Number(b.wonOnPenalties) || byStats(a, b))
 }
 
-/** Perdedores: cair nos pênaltis é melhor do que perder no tempo normal. */
-export function calculateBestLoser(entries: RankingEntry[]) {
-  return [...entries].sort((a, b) => Number(b.lostOnPenalties) - Number(a.lostOnPenalties) || byStats(a, b))[0] ?? null
+/** Perdedores: 1º cair nos pênaltis é melhor do que perder no tempo normal. Mesma regra da classificação geral. */
+export function calculateLoserRanking(entries: RankingEntry[]) {
+  return [...entries].sort((a, b) => Number(b.lostOnPenalties) - Number(a.lostOnPenalties) || byStats(a, b))
 }
 
 /** Agenda oficial fornecida pela organização; equipes são preenchidas pelo sorteio/cadastro administrativo. */

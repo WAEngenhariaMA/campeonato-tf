@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 import { and, asc, eq, or } from 'drizzle-orm'
 import { db } from './db/index.js'
 import { auditLogs, cards, championshipConfig, coaches, goals, matchReports, matches, players, registeredDocuments, representatives, teams, users } from './db/schema.js'
-import { calculateBestLoser, calculateWinnerRanking, officialSchedule, type RankingEntry } from './tournament.js'
+import { calculateLoserRanking, calculateWinnerRanking, officialSchedule, type RankingEntry } from './tournament.js'
 
 dotenv.config({ path: '.env.local' })
 
@@ -160,11 +160,11 @@ app.post('/api/matches/schedule', auth, admin, async (_req, res) => {
 })
 app.patch('/api/matches/:id', auth, admin, async (req, res) => {
   const id = param(req, 'id')
-  const { teamAId, teamBId, matchDate, matchTime, goalsA, goalsB, hadPenalties, penaltiesA, penaltiesB, status } = req.body
+  const { teamAId, teamBId, matchDate, matchTime, goalsA, goalsB, hadPenalties, penaltiesA, penaltiesB, foulsA, foulsB, status } = req.body
   const [existing] = await db.select().from(matches).where(eq(matches.id, id))
   if (!existing) return fail(res, 404, 'Partida não encontrada.')
   const patch: Record<string, unknown> = {}
-  for (const [key, value] of Object.entries({ teamAId, teamBId, matchDate, matchTime, goalsA, goalsB, hadPenalties, penaltiesA, penaltiesB, status })) if (value !== undefined) patch[key] = value
+  for (const [key, value] of Object.entries({ teamAId, teamBId, matchDate, matchTime, goalsA, goalsB, hadPenalties, penaltiesA, penaltiesB, foulsA, foulsB, status })) if (value !== undefined) patch[key] = value
   if (status === 'ENCERRADO' || status === 'WO') {
     const home = teamAId ?? existing.teamAId; const away = teamBId ?? existing.teamBId; const scoreA = goalsA ?? existing.goalsA; const scoreB = goalsB ?? existing.goalsB
     const penaltiesUsed = hadPenalties ?? existing.hadPenalties; const penaltyA = penaltiesA ?? existing.penaltiesA; const penaltyB = penaltiesB ?? existing.penaltiesB
@@ -211,9 +211,9 @@ app.post('/api/cards', auth, admin, async (req, res) => {
 })
 app.patch('/api/cards/:id', auth, admin, async (req, res) => { const id = param(req, 'id'); const [current] = await db.select().from(cards).where(eq(cards.id, id)); if (!current) return fail(res, 404, 'Cartão não encontrado.'); const { minute = current.minute, reason = current.reason, suspensionMatches = current.suspensionMatches } = req.body; const [updated] = await db.update(cards).set({ minute, reason, suspensionMatches }).where(eq(cards.id, id)).returning(); res.json(updated) })
 app.delete('/api/cards/:id', auth, admin, async (req, res) => { const id = param(req, 'id'); await db.delete(cards).where(eq(cards.id, id)); res.status(204).end() })
-app.delete('/api/matches/:id/result', auth, admin, async (req, res) => { const id = param(req, 'id'); await db.transaction(async (tx) => { await tx.delete(goals).where(eq(goals.matchId, id)); await tx.delete(cards).where(eq(cards.matchId, id)); await tx.update(matches).set({ goalsA: 0, goalsB: 0, hadPenalties: false, penaltiesA: null, penaltiesB: null, winnerTeamId: null, status: 'NAO_INICIADO' }).where(eq(matches.id, id)) }); res.status(204).end() })
+app.delete('/api/matches/:id/result', auth, admin, async (req, res) => { const id = param(req, 'id'); await db.transaction(async (tx) => { await tx.delete(goals).where(eq(goals.matchId, id)); await tx.delete(cards).where(eq(cards.matchId, id)); await tx.update(matches).set({ goalsA: 0, goalsB: 0, hadPenalties: false, penaltiesA: null, penaltiesB: null, foulsA: 0, foulsB: 0, winnerTeamId: null, status: 'NAO_INICIADO' }).where(eq(matches.id, id)) }); res.status(204).end() })
 
-type Standing = { position: number; teamId: string; teamName: string; games: number; wins: number; losses: number; goalsFor: number; goalsAgainst: number; goalDifference: number; yellowCards: number; redCards: number; situation: string }
+type Standing = { position: number; teamId: string; teamName: string; games: number; wins: number; losses: number; goalsFor: number; goalsAgainst: number; goalDifference: number; yellowCards: number; redCards: number; fouls: number; situation: string }
 async function tournamentSnapshot() {
   const allTeams = await db.select().from(teams).orderBy(asc(teams.name))
   const allMatches = await db.select().from(matches).orderBy(asc(matches.matchNumber))
@@ -222,24 +222,34 @@ async function tournamentSnapshot() {
   const allPlayers = await db.select().from(players)
   const playerName = new Map(allPlayers.map((player) => [player.id, player.fullName]))
   const teamName = new Map(allTeams.map((team) => [team.id, team.name]))
-  const values = new Map(allTeams.map((team) => [team.id, { team, games: 0, wins: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, yellowCards: 0, redCards: 0 }]))
+  const values = new Map(allTeams.map((team) => [team.id, { team, games: 0, wins: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, yellowCards: 0, redCards: 0, fouls: 0 }]))
   for (const card of allCards) { const entry = values.get(card.teamId); if (entry) { if (card.cardType === 'AMARELO') entry.yellowCards++; else entry.redCards++ } }
   const completedFirst = allMatches.filter((match) => match.phase === 'PRIMEIRA_FASE' && (match.status === 'ENCERRADO' || match.status === 'WO') && match.teamAId && match.teamBId)
   for (const match of completedFirst) {
     const a = values.get(match.teamAId!), b = values.get(match.teamBId!); if (!a || !b) continue
     a.games++; b.games++; a.goalsFor += match.goalsA; a.goalsAgainst += match.goalsB; b.goalsFor += match.goalsB; b.goalsAgainst += match.goalsA
+    a.fouls += match.foulsA; b.fouls += match.foulsB
     if (match.winnerTeamId === a.team.id) { a.wins++; b.losses++ } else if (match.winnerTeamId === b.team.id) { b.wins++; a.losses++ }
   }
   const rankingInput: RankingEntry[] = completedFirst.flatMap((match) => [match.teamAId, match.teamBId].map((teamId) => {
     const item = values.get(teamId!)!
-    return { teamId: item.team.id, teamName: item.team.name, goalsFor: item.goalsFor, goalsAgainst: item.goalsAgainst, yellowCards: item.yellowCards, redCards: item.redCards, wonOnPenalties: match.winnerTeamId === item.team.id && match.hadPenalties, lostOnPenalties: match.winnerTeamId !== item.team.id && match.hadPenalties }
+    return { teamId: item.team.id, teamName: item.team.name, goalsFor: item.goalsFor, goalsAgainst: item.goalsAgainst, yellowCards: item.yellowCards, redCards: item.redCards, fouls: item.fouls, wonOnPenalties: match.winnerTeamId === item.team.id && match.hadPenalties, lostOnPenalties: match.winnerTeamId !== item.team.id && match.hadPenalties }
   }))
   const winners = calculateWinnerRanking(rankingInput.filter((entry) => completedFirst.some((match) => match.winnerTeamId === entry.teamId)))
-  const losers = rankingInput.filter((entry) => completedFirst.some((match) => match.teamAId === entry.teamId || match.teamBId === entry.teamId) && !winners.some((winner) => winner.teamId === entry.teamId))
-  const bestLoser = calculateBestLoser(losers)
+  // A classificação geral usa exatamente a mesma regra do mata-mata (8 critérios) — o campeonato
+  // inteiro é eliminatório, então não faz sentido ter uma régua diferente pra "fase de grupos".
+  const losers = calculateLoserRanking(rankingInput.filter((entry) => completedFirst.some((match) => match.teamAId === entry.teamId || match.teamBId === entry.teamId) && !winners.some((winner) => winner.teamId === entry.teamId)))
+  const bestLoser = losers[0] ?? null
   const situation = new Map<string, string>()
   if (completedFirst.length === 5) { winners.forEach((winner, index) => situation.set(winner.teamId, index < 2 ? 'SEMIFINAL' : 'PLAYOFF')); if (bestLoser) situation.set(bestLoser.teamId, 'MELHOR PERDEDOR'); for (const entry of losers) if (entry.teamId !== bestLoser?.teamId) situation.set(entry.teamId, 'ELIMINADO') }
-  const standings: Standing[] = [...values.values()].map((item) => ({ teamId: item.team.id, teamName: item.team.name, games: item.games, wins: item.wins, losses: item.losses, goalsFor: item.goalsFor, goalsAgainst: item.goalsAgainst, goalDifference: item.goalsFor - item.goalsAgainst, yellowCards: item.yellowCards, redCards: item.redCards, situation: situation.get(item.team.id) ?? (completedFirst.length === 5 ? 'ELIMINADO' : 'EM DISPUTA') })).sort((a, b) => b.wins - a.wins || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor || a.goalsAgainst - b.goalsAgainst || a.redCards - b.redCards || a.yellowCards - b.yellowCards || a.teamName.localeCompare(b.teamName)).map((entry, index) => ({ ...entry, position: index + 1 }))
+  // Times que ainda não jogaram a primeira fase: sem estatística pra ordenar, ficam depois dos que já jogaram.
+  const rankedIds = new Set([...winners, ...losers].map((entry) => entry.teamId))
+  const notPlayed = [...values.values()].filter((item) => !rankedIds.has(item.team.id)).sort((a, b) => a.team.name.localeCompare(b.team.name))
+  const orderedIds = [...winners.map((w) => w.teamId), ...losers.map((l) => l.teamId), ...notPlayed.map((n) => n.team.id)]
+  const standings: Standing[] = orderedIds.map((teamId, index) => {
+    const item = values.get(teamId)!
+    return { position: index + 1, teamId, teamName: item.team.name, games: item.games, wins: item.wins, losses: item.losses, goalsFor: item.goalsFor, goalsAgainst: item.goalsAgainst, goalDifference: item.goalsFor - item.goalsAgainst, yellowCards: item.yellowCards, redCards: item.redCards, fouls: item.fouls, situation: situation.get(teamId) ?? (completedFirst.length === 5 ? 'ELIMINADO' : 'EM DISPUTA') }
+  })
   const disciplinary = [...new Map(allPlayers.map((player) => [player.id, player])).values()].map((player) => {
     const playerCards = allCards.filter((card) => card.playerId === player.id)
     const yellowCards = playerCards.filter((card) => card.cardType === 'AMARELO').length

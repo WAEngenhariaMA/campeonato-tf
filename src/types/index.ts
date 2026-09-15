@@ -84,6 +84,8 @@ export interface Match {
   hadPenalties: boolean
   penaltiesA: number | null
   penaltiesB: number | null
+  foulsA: number
+  foulsB: number
   status: MatchStatus
   winnerTeamId: string | null
   createdAt: string
@@ -124,6 +126,7 @@ export interface Standing {
   goalDifference: number
   yellowCards: number
   redCards: number
+  fouls: number
   situation: string
 }
 

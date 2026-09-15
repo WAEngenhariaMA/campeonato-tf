@@ -84,9 +84,9 @@ export default function PublicTournamentPanel() {
             <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
               <div>
                 <h2 className="text-2xl font-black">CLASSIFICAÇÃO</h2>
-                <p className="text-sm text-ink-500">Critérios: vitórias, saldo de gols, gols pró, gols contra, menos vermelhos e menos amarelos.</p>
+                <p className="text-sm text-ink-500">Resultado no tempo normal, saldo de gols, gols marcados, gols sofridos, cartões e faltas — veja a aba Critérios.</p>
               </div>
-              <span className="text-xs text-ink-400">SG saldo · GP pró · GC contra · CV vermelho · CA amarelo</span>
+              <span className="text-xs text-ink-400">SG saldo · GP pró · GC contra · CV vermelho · CA amarelo · FT faltas</span>
             </div>
             <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
               <StandingsTable standings={standings} teamsById={teamsById} />

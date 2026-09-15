@@ -59,6 +59,8 @@ export const matches = pgTable('matches', {
   teamAId: uuid('team_a_id').references(() => teams.id), teamBId: uuid('team_b_id').references(() => teams.id),
   matchDate: date('match_date'), matchTime: text('match_time'), goalsA: integer('goals_a').notNull().default(0), goalsB: integer('goals_b').notNull().default(0),
   hadPenalties: boolean('had_penalties').notNull().default(false), penaltiesA: integer('penalties_a'), penaltiesB: integer('penalties_b'),
+  /** Faltas cometidas por cada time — critério de desempate (menor número de faltas). */
+  foulsA: integer('fouls_a').notNull().default(0), foulsB: integer('fouls_b').notNull().default(0),
   status: text('status').notNull().default('NAO_INICIADO'), winnerTeamId: uuid('winner_team_id').references(() => teams.id), createdAt: createdAt(),
 })
 

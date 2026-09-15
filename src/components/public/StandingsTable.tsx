@@ -29,7 +29,7 @@ function PositionBadge({ position }: { position: number }) {
   )
 }
 
-const COLS = ['POS', 'TIME', 'J', 'V', 'D', 'SG', 'GP', 'GC', 'CV', 'CA', 'SITUAÇÃO'] as const
+const COLS = ['POS', 'TIME', 'J', 'V', 'D', 'SG', 'GP', 'GC', 'CV', 'CA', 'FT', 'SITUAÇÃO'] as const
 
 export function StandingsTable({ standings, teamsById }: { standings: Standing[]; teamsById: Map<string, Team> }) {
   if (standings.length === 0) {
@@ -67,6 +67,7 @@ export function StandingsTable({ standings, teamsById }: { standings: Standing[]
               <td className="px-3 py-3 tabular-nums">{team.goalsAgainst}</td>
               <td className="px-3 py-3 tabular-nums">{team.redCards}</td>
               <td className="px-3 py-3 tabular-nums">{team.yellowCards}</td>
+              <td className="px-3 py-3 tabular-nums">{team.fouls}</td>
               <td className="px-3 py-3"><span className={clsx('rounded-full px-2 py-1 text-xs font-bold', situationTone(team.situation))}>{team.situation}</span></td>
             </tr>
           ))}
