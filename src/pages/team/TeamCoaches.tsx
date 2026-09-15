@@ -103,9 +103,9 @@ export default function TeamCoaches() {
             <Input label="Nome completo" value={fullName} onChange={(e) => setFullName(e.target.value)} required disabled={atLimit} />
             <Input
               label="Documento"
+              hint="Opcional"
               value={documentNumber}
               onChange={(e) => setDocumentNumber(maskCPF(e.target.value))}
-              required
               disabled={atLimit}
             />
             <Button type="submit" loading={submitting} disabled={atLimit} className="h-fit">
@@ -142,7 +142,7 @@ export default function TeamCoaches() {
                 {coaches.map((c) => (
                   <tr key={c.id} className="border-b border-ink-50 last:border-0 hover:bg-ink-50/60">
                     <td className="px-5 py-3 font-semibold text-ink-900">{c.fullName}</td>
-                    <td className="px-5 py-3 text-ink-500">{c.document}</td>
+                    <td className="px-5 py-3 text-ink-500">{c.document || '—'}</td>
                     <td className="px-5 py-3 text-right">
                       {!locked && (
                         <div className="inline-flex gap-1.5">

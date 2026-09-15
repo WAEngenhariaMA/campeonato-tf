@@ -13,9 +13,10 @@ export interface DuplicateAlert {
 }
 
 /**
- * Document-exact duplicates can't actually occur — addPlayer's transaction blocks them
- * at write time — so this only ever surfaces name-similarity alerts today. Kept as a
- * scan (not a live index) since legacy/imported data could reintroduce exact matches later.
+ * Documento é opcional, então duplicidade exata só é possível para quem preencheu um — a API
+ * já bloqueia isso na escrita (chave única em registeredDocuments), então esse critério aqui é
+ * mais uma segunda camada de garantia do que a via principal de detecção. Nomes parecidos
+ * continuam sendo o alerta mais comum, especialmente entre jogadores sem documento.
  */
 export function findDuplicateAlerts(players: Player[], teamsById: Map<string, Team>): DuplicateAlert[] {
   const alerts: DuplicateAlert[] = []
@@ -26,7 +27,9 @@ export function findDuplicateAlerts(players: Player[], teamsById: Map<string, Te
       const b = players[j]
       if (a.teamId === b.teamId && a.fullName === b.fullName) continue
 
-      if (a.documentNormalized === b.documentNormalized) {
+      // Documento é opcional agora — comparar duas strings vazias marcaria todo par de
+      // jogadores sem documento como duplicidade crítica, então só compara quando ambos têm um.
+      if (a.documentNormalized && a.documentNormalized === b.documentNormalized) {
         alerts.push({
           id: `${a.id}-${b.id}`,
           level: 'CRITICO',

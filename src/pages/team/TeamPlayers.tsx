@@ -115,9 +115,9 @@ export default function TeamPlayers() {
             />
             <Input
               label="Documento"
+              hint="Opcional"
               value={documentNumber}
               onChange={(e) => setDocumentNumber(maskCPF(e.target.value))}
-              required
               disabled={atLimit}
             />
             <Button type="submit" loading={submitting} disabled={atLimit} className="h-fit">
@@ -158,7 +158,7 @@ export default function TeamPlayers() {
                   <tr key={p.id} className="border-b border-ink-50 last:border-0 hover:bg-ink-50/60">
                     <td className="px-5 py-3 text-ink-400">{i + 1}</td>
                     <td className="px-5 py-3 font-semibold text-ink-900">{p.fullName}</td>
-                    <td className="px-5 py-3 text-ink-500">{p.document}</td>
+                    <td className="px-5 py-3 text-ink-500">{p.document || '—'}</td>
                     <td className="px-5 py-3 text-right">
                       {!locked && (
                         <div className="inline-flex gap-1.5">

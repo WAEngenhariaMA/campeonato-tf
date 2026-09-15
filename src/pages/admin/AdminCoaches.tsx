@@ -71,7 +71,7 @@ export default function AdminCoaches() {
                 {rows.map((c) => (
                   <tr key={c.id} className="border-b border-ink-50 last:border-0 hover:bg-ink-50/60">
                     <td className="px-5 py-3 font-semibold text-ink-900">{c.fullName}</td>
-                    <td className="px-5 py-3 text-ink-500">{c.document}</td>
+                    <td className="px-5 py-3 text-ink-500">{c.document || '—'}</td>
                     <td className="px-5 py-3 text-ink-500">{teamsById.get(c.teamId)?.name ?? c.teamId}</td>
                   </tr>
                 ))}

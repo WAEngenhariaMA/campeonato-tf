@@ -79,7 +79,7 @@ export default function AdminPlayers() {
                   <tr key={p.id} className="border-b border-ink-50 last:border-0 hover:bg-ink-50/60">
                     <td className="px-5 py-3 text-ink-400">{i + 1}</td>
                     <td className="px-5 py-3 font-semibold text-ink-900">{p.fullName}</td>
-                    <td className="px-5 py-3 text-ink-500">{p.document}</td>
+                    <td className="px-5 py-3 text-ink-500">{p.document || '—'}</td>
                     <td className="px-5 py-3 text-ink-500">{teamsById.get(p.teamId)?.name ?? p.teamId}</td>
                   </tr>
                 ))}
