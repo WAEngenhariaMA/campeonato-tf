@@ -213,7 +213,7 @@ app.patch('/api/cards/:id', auth, admin, async (req, res) => { const id = param(
 app.delete('/api/cards/:id', auth, admin, async (req, res) => { const id = param(req, 'id'); await db.delete(cards).where(eq(cards.id, id)); res.status(204).end() })
 app.delete('/api/matches/:id/result', auth, admin, async (req, res) => { const id = param(req, 'id'); await db.transaction(async (tx) => { await tx.delete(goals).where(eq(goals.matchId, id)); await tx.delete(cards).where(eq(cards.matchId, id)); await tx.update(matches).set({ goalsA: 0, goalsB: 0, hadPenalties: false, penaltiesA: null, penaltiesB: null, foulsA: 0, foulsB: 0, winnerTeamId: null, status: 'NAO_INICIADO' }).where(eq(matches.id, id)) }); res.status(204).end() })
 
-type Standing = { position: number; teamId: string; teamName: string; games: number; wins: number; losses: number; goalsFor: number; goalsAgainst: number; goalDifference: number; yellowCards: number; redCards: number; fouls: number; situation: string }
+type Standing = { position: number; teamId: string; teamName: string; games: number; wins: number; losses: number; points: number; goalsFor: number; goalsAgainst: number; goalDifference: number; yellowCards: number; redCards: number; fouls: number; situation: string }
 async function tournamentSnapshot() {
   const allTeams = await db.select().from(teams).orderBy(asc(teams.name))
   const allMatches = await db.select().from(matches).orderBy(asc(matches.matchNumber))
@@ -248,7 +248,7 @@ async function tournamentSnapshot() {
   const orderedIds = [...winners.map((w) => w.teamId), ...losers.map((l) => l.teamId), ...notPlayed.map((n) => n.team.id)]
   const standings: Standing[] = orderedIds.map((teamId, index) => {
     const item = values.get(teamId)!
-    return { position: index + 1, teamId, teamName: item.team.name, games: item.games, wins: item.wins, losses: item.losses, goalsFor: item.goalsFor, goalsAgainst: item.goalsAgainst, goalDifference: item.goalsFor - item.goalsAgainst, yellowCards: item.yellowCards, redCards: item.redCards, fouls: item.fouls, situation: situation.get(teamId) ?? (completedFirst.length === 5 ? 'ELIMINADO' : 'EM DISPUTA') }
+    return { position: index + 1, teamId, teamName: item.team.name, games: item.games, wins: item.wins, losses: item.losses, points: item.wins * 3, goalsFor: item.goalsFor, goalsAgainst: item.goalsAgainst, goalDifference: item.goalsFor - item.goalsAgainst, yellowCards: item.yellowCards, redCards: item.redCards, fouls: item.fouls, situation: situation.get(teamId) ?? (completedFirst.length === 5 ? 'ELIMINADO' : 'EM DISPUTA') }
   })
   const disciplinary = [...new Map(allPlayers.map((player) => [player.id, player])).values()].map((player) => {
     const playerCards = allCards.filter((card) => card.playerId === player.id)

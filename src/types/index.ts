@@ -121,6 +121,7 @@ export interface Standing {
   games: number
   wins: number
   losses: number
+  points: number
   goalsFor: number
   goalsAgainst: number
   goalDifference: number
