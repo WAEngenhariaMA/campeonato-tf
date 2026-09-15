@@ -123,8 +123,12 @@ JWT_SECRET=...                            # segredo: a mesma chave ou outra chav
 ADMIN_LOGIN=organizacao
 ADMIN_PASSWORD=...                        # segredo: usado só para criar o primeiro admin
 WEB_ORIGIN=https://SEU-USUARIO.github.io
-PORT=3001
 ```
+
+> **Não cadastre `PORT`.** Serviços como Render e Railway escolhem a porta sozinhos e a passam
+> pela variável de ambiente `PORT` — o código já lê `process.env.PORT` (`server/index.ts`). Definir
+> `PORT` manualmente sobrescreve isso e trava o deploy: a plataforma espera a porta que ela mesma
+> escolheu (no Render, normalmente 10000) e nunca encontra nada, então o healthcheck expira.
 
 Depois de publicado, teste no navegador:
 
