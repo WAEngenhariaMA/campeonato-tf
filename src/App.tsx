@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Home from './pages/public/Home'
 import PublicTournamentPanel from './pages/public/PublicTournamentPanel'
@@ -25,6 +26,9 @@ import AdminResults from './pages/admin/AdminResults'
 import AdminStandings from './pages/admin/AdminStandings'
 import AdminBracket from './pages/admin/AdminBracket'
 import AdminDraw from './pages/admin/AdminDraw'
+// Carregado sob demanda: o @react-pdf/renderer sozinho pesa mais de 1MB, e só é preciso
+// nesta única tela — separá-lo evita que todo visitante do site baixe esse peso à toa.
+const AdminMatchReports = lazy(() => import('./pages/admin/AdminMatchReports'))
 import { Protected } from './components/layout/Protected'
 
 export default function App() {
@@ -72,6 +76,14 @@ export default function App() {
         <Route path="duplicidades" element={<AdminDuplicates />} />
         <Route path="confrontos" element={<AdminMatches />} />
         <Route path="resultados" element={<AdminResults />} />
+        <Route
+          path="sumulas"
+          element={
+            <Suspense fallback={<div className="p-8 text-center text-sm text-ink-400">Carregando…</div>}>
+              <AdminMatchReports />
+            </Suspense>
+          }
+        />
         <Route path="classificacao" element={<AdminStandings />} />
         <Route path="chaveamento" element={<AdminBracket />} />
         <Route path="sorteio" element={<AdminDraw />} />

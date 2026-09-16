@@ -1,5 +1,5 @@
 import { Outlet, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Shield, UserRound, Users, UserCog, Copy, GitBranch, ListChecks, BarChart3, Trophy, Dices, Settings } from 'lucide-react'
+import { LayoutDashboard, Shield, UserRound, Users, UserCog, Copy, GitBranch, ListChecks, FileText, BarChart3, Trophy, Dices, Settings } from 'lucide-react'
 import { DashboardShell, type NavItem } from '../../components/layout/DashboardShell'
 import { useAuth } from '../../auth/AuthContext'
 import { CHAMPIONSHIP_LOGO } from '../../lib/branding'
@@ -13,6 +13,7 @@ const NAV: NavItem[] = [
   { label: 'DUPLICIDADES', to: '/admin/duplicidades', icon: Copy },
   { label: 'CONFRONTOS', to: '/admin/confrontos', icon: GitBranch },
   { label: 'RESULTADOS', to: '/admin/resultados', icon: ListChecks },
+  { label: 'SÚMULAS', to: '/admin/sumulas', icon: FileText },
   { label: 'CLASSIFICAÇÃO', to: '/admin/classificacao', icon: BarChart3 },
   { label: 'CHAVEAMENTO', to: '/admin/chaveamento', icon: Trophy },
   { label: 'SORTEIO', to: '/admin/sorteio', icon: Dices },
