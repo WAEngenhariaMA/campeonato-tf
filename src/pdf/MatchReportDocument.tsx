@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   teamInfoFaltasBox: { width: 20, height: 11, border: `0.75pt solid ${ink[950]}`, borderRadius: 2 },
 
   tableHeaderRow: { flexDirection: 'row', borderBottom: `0.9pt solid ${ink[950]}` },
-  tableRow: { flexDirection: 'row', borderBottom: `0.5pt solid ${grid}`, minHeight: 10.5 },
+  tableRow: { flexDirection: 'row', borderBottom: `0.5pt solid ${grid}`, minHeight: 12, paddingVertical: 1 },
   cellNum: { width: '7%', borderRight: `0.5pt solid ${grid}`, alignItems: 'center', justifyContent: 'center' },
   cellSign: { width: '19%', borderRight: `0.5pt solid ${grid}` },
   cellName: { width: '45%', borderRight: `0.5pt solid ${grid}`, paddingHorizontal: 3, justifyContent: 'center' },
@@ -78,9 +78,9 @@ const styles = StyleSheet.create({
   wideCell: { flex: 1, paddingHorizontal: 5, justifyContent: 'center' },
   wideCellText: { fontSize: 7, fontFamily: 'Helvetica-Bold' },
 
-  refereeRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
+  refereeRow: { flexDirection: 'row', gap: 10, marginTop: 3 },
   refereeCol: { flex: 1, alignItems: 'center' },
-  refereeLine: { width: '90%', borderBottom: `0.75pt solid ${ink[950]}`, marginTop: 14, marginBottom: 3 },
+  refereeLine: { width: '90%', borderBottom: `0.75pt solid ${ink[950]}`, marginTop: 9, marginBottom: 3 },
   refereeLabel: { fontSize: 6.5, color: ink[500] },
 
   footerNote: { position: 'absolute', bottom: 10, left: 24, right: 24, fontSize: 5.5, color: ink[300], textAlign: 'center' },
