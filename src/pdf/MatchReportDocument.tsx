@@ -24,144 +24,182 @@ const ink = { 950: '#0b0f14', 700: '#202834', 500: '#3d4a5e', 300: '#8493ac', 10
 const brand = '#0752b5'
 
 const styles = StyleSheet.create({
-  page: { padding: 28, fontSize: 8.5, fontFamily: 'Helvetica', color: ink[950] },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingBottom: 8, borderBottom: `2pt solid ${brand}` },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  logo: { width: 32, height: 32, borderRadius: 4 },
-  championshipName: { fontSize: 11, fontFamily: 'Helvetica-Bold', color: brand },
-  championshipSeason: { fontSize: 7, color: ink[500] },
-  sumulaTitle: { fontSize: 13, fontFamily: 'Helvetica-Bold', textAlign: 'right' },
-  sumulaSubtitle: { fontSize: 7.5, color: ink[500], textAlign: 'right' },
+  page: { padding: 22, fontSize: 7.5, fontFamily: 'Helvetica', color: ink[950] },
 
-  matchInfoRow: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: ink[50], padding: 6, borderRadius: 3, marginBottom: 10 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6, paddingBottom: 6, borderBottom: `2pt solid ${brand}` },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  logo: { width: 26, height: 26, borderRadius: 4 },
+  championshipName: { fontSize: 10, fontFamily: 'Helvetica-Bold', color: brand },
+  championshipSeason: { fontSize: 6.5, color: ink[500] },
+  sumulaTitle: { fontSize: 12, fontFamily: 'Helvetica-Bold', textAlign: 'right' },
+  sumulaSubtitle: { fontSize: 7, color: ink[500], textAlign: 'right' },
+
+  matchInfoRow: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: ink[50], padding: 5, borderRadius: 3, marginBottom: 7 },
   matchInfoItem: { flexDirection: 'column' },
   matchInfoLabel: { fontSize: 6, color: ink[500], textTransform: 'uppercase' },
-  matchInfoValue: { fontSize: 9, fontFamily: 'Helvetica-Bold' },
+  matchInfoValue: { fontSize: 8.5, fontFamily: 'Helvetica-Bold' },
 
-  teamsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  teamBlock: { flexDirection: 'row', alignItems: 'center', gap: 6, width: '38%' },
-  teamBlockReverse: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6, width: '38%' },
-  shield: { width: 30, height: 30, objectFit: 'contain' },
-  teamName: { fontSize: 10, fontFamily: 'Helvetica-Bold', flexShrink: 1 },
+  teamsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 },
+  teamBlock: { flexDirection: 'row', alignItems: 'center', gap: 5, width: '38%' },
+  teamBlockReverse: { flexDirection: 'row-reverse', alignItems: 'center', gap: 5, width: '38%' },
+  shield: { width: 24, height: 24, objectFit: 'contain' },
+  shieldSmall: { width: 16, height: 16, objectFit: 'contain' },
+  teamName: { fontSize: 9, fontFamily: 'Helvetica-Bold', flexShrink: 1 },
   vsBox: { width: '24%', alignItems: 'center' },
-  vsLabel: { fontSize: 7, color: ink[500], marginBottom: 3 },
+  vsLabel: { fontSize: 6.5, color: ink[500], marginBottom: 2 },
   resultBoxes: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  resultBox: { width: 26, height: 26, border: `1.2pt solid ${ink[950]}`, borderRadius: 3 },
-  resultX: { fontSize: 11, fontFamily: 'Helvetica-Bold' },
+  resultBox: { width: 22, height: 22, border: `1.2pt solid ${ink[950]}`, borderRadius: 3 },
+  resultX: { fontSize: 10, fontFamily: 'Helvetica-Bold' },
 
-  extraRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
-  extraCol: { flex: 1, border: `0.75pt solid ${ink[300]}`, borderRadius: 3, padding: 6 },
-  extraLabel: { fontSize: 6.5, color: ink[500], textTransform: 'uppercase', marginBottom: 3 },
-  extraLine: { flexDirection: 'row', gap: 6 },
-  blankBox: { width: 30, height: 14, border: `0.75pt solid ${ink[950]}`, borderRadius: 2 },
+  extraRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  extraCol: { flex: 1, border: `0.75pt solid ${ink[300]}`, borderRadius: 3, paddingVertical: 3, paddingHorizontal: 5, flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  extraLabel: { fontSize: 6.5, color: ink[500], textTransform: 'uppercase' },
+  extraLine: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  blankBox: { width: 22, height: 12, border: `0.75pt solid ${ink[950]}`, borderRadius: 2 },
 
-  sectionTitle: { fontSize: 8.5, fontFamily: 'Helvetica-Bold', color: brand, marginBottom: 4, marginTop: 8, textTransform: 'uppercase' },
+  teamSection: { border: `0.75pt solid ${ink[300]}`, borderRadius: 3, padding: 6, marginBottom: 6 },
+  teamSectionHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4, paddingBottom: 4, borderBottom: `0.75pt solid ${ink[100]}` },
+  teamSectionTitle: { fontSize: 9.5, fontFamily: 'Helvetica-Bold', color: brand, textTransform: 'uppercase' },
 
-  rostersRow: { flexDirection: 'row', gap: 10 },
-  rosterCol: { flex: 1 },
-  rosterHeaderRow: { flexDirection: 'row', backgroundColor: ink[950], color: 'white', paddingVertical: 3, paddingHorizontal: 3 },
-  rosterRow: { flexDirection: 'row', borderBottom: `0.5pt solid ${ink[100]}`, paddingVertical: 2.5, paddingHorizontal: 3 },
-  rosterRowSuspended: { flexDirection: 'row', borderBottom: `0.5pt solid ${ink[100]}`, paddingVertical: 2.5, paddingHorizontal: 3, backgroundColor: '#fdeceb' },
-  colNum: { width: '10%', fontFamily: 'Helvetica-Bold' },
-  colName: { width: '68%' },
-  colSusp: { width: '22%', fontSize: 6.5, fontFamily: 'Helvetica-Bold', color: '#b3261e' },
+  rosterAreaRow: { flexDirection: 'row', gap: 8 },
+  rosterColumnsWrap: { flexDirection: 'row', gap: 8, flex: 2.3 },
+  rosterSubCol: { flex: 1 },
+  rosterHeaderRow: { flexDirection: 'row', backgroundColor: ink[950], color: 'white', paddingVertical: 2, paddingHorizontal: 2 },
+  rosterRow: { flexDirection: 'row', alignItems: 'center', borderBottom: `0.6pt solid ${ink[300]}`, paddingVertical: 2, paddingHorizontal: 2, minHeight: 13 },
+  colNumHeader: { width: '16%', fontSize: 6 },
+  colNameHeader: { width: '52%', fontSize: 6 },
+  colSignHeader: { width: '32%', fontSize: 6, textAlign: 'right' },
+  numBox: { width: 14, height: 10, border: `0.6pt solid ${ink[950]}`, borderRadius: 1.5 },
+  colNumWrap: { width: '16%' },
+  colName: { width: '52%', fontSize: 7 },
+  colNameSuspended: { width: '52%', fontSize: 7, color: '#b3261e', fontFamily: 'Helvetica-Bold' },
+  colSign: { width: '32%' },
 
-  eventsRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  eventsCol: { flex: 1 },
-  eventsHeaderRow: { flexDirection: 'row', backgroundColor: ink[950], color: 'white', paddingVertical: 3, paddingHorizontal: 3 },
-  eventsRowLine: { flexDirection: 'row', borderBottom: `0.5pt solid ${ink[100]}`, paddingVertical: 4.5, paddingHorizontal: 3 },
-  eventsColSeq: { width: '10%', color: ink[300] },
-  eventsColNum: { width: '18%' },
-  eventsColTeam: { width: '30%' },
-  eventsColType: { width: '42%' },
+  sideBox: { flex: 1, border: `0.6pt solid ${ink[300]}`, borderRadius: 3, padding: 4 },
+  sideBoxTitle: { fontSize: 6.5, fontFamily: 'Helvetica-Bold', color: brand, textTransform: 'uppercase', marginBottom: 2, marginTop: 4 },
+  sideBoxTitleFirst: { fontSize: 6.5, fontFamily: 'Helvetica-Bold', color: brand, textTransform: 'uppercase', marginBottom: 2 },
+  sideEventLine: { flexDirection: 'row', alignItems: 'center', gap: 3, borderBottom: `0.5pt solid ${ink[100]}`, paddingVertical: 1.5 },
+  sideEventNumBox: { width: 14, height: 9, border: `0.6pt solid ${ink[950]}`, borderRadius: 1.5 },
+  sideEventLabel: { fontSize: 6, color: ink[500] },
 
-  peopleRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  peopleCol: { flex: 1, border: `0.75pt solid ${ink[300]}`, borderRadius: 3, padding: 6 },
-  peopleTeamName: { fontSize: 7.5, fontFamily: 'Helvetica-Bold', marginBottom: 4 },
-  signLine: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', borderBottom: `0.5pt solid ${ink[300]}`, paddingBottom: 2, marginBottom: 5 },
-  signLabel: { fontSize: 6.5, color: ink[500] },
-  signName: { fontSize: 7.5 },
+  peopleRow: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 8, rowGap: 3, marginTop: 4, paddingTop: 4, borderTop: `0.6pt solid ${ink[100]}` },
+  peopleItem: { width: '23%' },
+  peopleSignLine: { borderBottom: `0.6pt solid ${ink[300]}`, paddingBottom: 1.5, marginTop: 1 },
+  peopleName: { fontSize: 6.5 },
+  peopleLabel: { fontSize: 5.5, color: ink[500] },
 
-  refereeRow: { flexDirection: 'row', gap: 10, marginTop: 10 },
+  obsBox: { marginTop: 2, border: `0.75pt solid ${ink[300]}`, borderRadius: 3, padding: 5, minHeight: 24 },
+  obsLabel: { fontSize: 6.5, color: ink[500], textTransform: 'uppercase', marginBottom: 2 },
+
+  refereeRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
   refereeCol: { flex: 1, alignItems: 'center' },
-  refereeLine: { width: '90%', borderBottom: `0.75pt solid ${ink[950]}`, marginTop: 18, marginBottom: 3 },
-  refereeLabel: { fontSize: 7, color: ink[500] },
+  refereeLine: { width: '90%', borderBottom: `0.75pt solid ${ink[950]}`, marginTop: 14, marginBottom: 3 },
+  refereeLabel: { fontSize: 6.5, color: ink[500] },
 
-  obsBox: { marginTop: 8, border: `0.75pt solid ${ink[300]}`, borderRadius: 3, padding: 6, minHeight: 34 },
-  obsLabel: { fontSize: 6.5, color: ink[500], textTransform: 'uppercase', marginBottom: 3 },
-
-  footerNote: { position: 'absolute', bottom: 16, left: 28, right: 28, fontSize: 6, color: ink[300], textAlign: 'center' },
+  footerNote: { position: 'absolute', bottom: 10, left: 22, right: 22, fontSize: 5.5, color: ink[300], textAlign: 'center' },
 })
 
-function Roster({ title, players, suspendedIds }: { title: string; players: Player[]; suspendedIds: Set<string> }) {
+function RosterSubColumn({ players, suspendedIds }: { players: Player[]; suspendedIds: Set<string> }) {
   return (
-    <View style={styles.rosterCol}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+    <View style={styles.rosterSubCol}>
       <View style={styles.rosterHeaderRow}>
-        <Text style={styles.colNum}>Nº</Text>
-        <Text style={styles.colName}>JOGADOR</Text>
-        <Text style={styles.colSusp}>SITUAÇÃO</Text>
+        <Text style={styles.colNumHeader}>Nº</Text>
+        <Text style={styles.colNameHeader}>JOGADOR</Text>
+        <Text style={styles.colSignHeader}>ASSINATURA</Text>
       </View>
-      {players.map((player, index) => (
-        <View style={suspendedIds.has(player.id) ? styles.rosterRowSuspended : styles.rosterRow} key={player.id}>
-          <Text style={styles.colNum}>{index + 1}</Text>
-          <Text style={styles.colName}>{player.fullName}</Text>
-          <Text style={styles.colSusp}>{suspendedIds.has(player.id) ? 'SUSPENSO' : ''}</Text>
+      {players.map((player) => (
+        <View style={styles.rosterRow} key={player.id}>
+          <View style={styles.colNumWrap}>
+            <View style={styles.numBox} />
+          </View>
+          <Text style={suspendedIds.has(player.id) ? styles.colNameSuspended : styles.colName}>
+            {player.fullName}
+            {suspendedIds.has(player.id) ? ' (SUSPENSO)' : ''}
+          </Text>
+          <View style={styles.colSign} />
         </View>
       ))}
-      {players.length === 0 && <Text style={{ padding: 4, color: ink[300] }}>Nenhum jogador cadastrado.</Text>}
     </View>
   )
 }
 
-function EventsTable({ title, rows = 10 }: { title: string; rows?: number }) {
+function TeamEventsSideBox() {
   return (
-    <View style={styles.eventsCol}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.eventsHeaderRow}>
-        <Text style={styles.eventsColSeq}>#</Text>
-        <Text style={styles.eventsColNum}>Nº JOGADOR</Text>
-        <Text style={styles.eventsColTeam}>TIME</Text>
-        <Text style={styles.eventsColType}>{title === 'GOLS' ? 'OBSERVAÇÃO' : 'AMARELO / VERMELHO'}</Text>
-      </View>
-      {Array.from({ length: rows }).map((_, i) => (
-        <View style={styles.eventsRowLine} key={i}>
-          <Text style={styles.eventsColSeq}>{i + 1}</Text>
-          <Text style={styles.eventsColNum} />
-          <Text style={styles.eventsColTeam} />
-          <Text style={styles.eventsColType} />
+    <View style={styles.sideBox}>
+      <Text style={styles.sideBoxTitleFirst}>Gols — Nº</Text>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <View style={styles.sideEventLine} key={`g${i}`}>
+          <View style={styles.sideEventNumBox} />
+          <Text style={styles.sideEventLabel}>{i + 1}º gol</Text>
+        </View>
+      ))}
+      <Text style={styles.sideBoxTitle}>Cartão amarelo — Nº</Text>
+      {Array.from({ length: 4 }).map((_, i) => (
+        <View style={styles.sideEventLine} key={`a${i}`}>
+          <View style={styles.sideEventNumBox} />
+        </View>
+      ))}
+      <Text style={styles.sideBoxTitle}>Cartão vermelho — Nº</Text>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <View style={styles.sideEventLine} key={`v${i}`}>
+          <View style={styles.sideEventNumBox} />
         </View>
       ))}
     </View>
   )
 }
 
-function PeopleSignatures({
-  teamName,
-  registration,
+function TeamSection({
+  team,
+  players,
   coaches,
+  registration,
+  suspendedIds,
 }: {
-  teamName: string
-  registration: RepresentativeRegistration | null
+  team: Team | null
+  players: Player[]
   coaches: Coach[]
+  registration: RepresentativeRegistration | null
+  suspendedIds: Set<string>
 }) {
-  const rows: { label: string; name: string }[] = []
+  const half = Math.ceil(players.length / 2)
+  const colA = players.slice(0, half)
+  const colB = players.slice(half)
+
+  const people: { label: string; name: string }[] = []
   if (registration) {
-    rows.push({ label: 'Representante 1', name: registration.rep1Name })
-    if (registration.rep2Name) rows.push({ label: 'Representante 2', name: registration.rep2Name })
+    people.push({ label: 'Representante 1', name: registration.rep1Name })
+    if (registration.rep2Name) people.push({ label: 'Representante 2', name: registration.rep2Name })
   }
-  coaches.forEach((coach, i) => rows.push({ label: coaches.length > 1 ? `Técnico ${i + 1}` : 'Técnico', name: coach.fullName }))
+  coaches.forEach((coach, i) => people.push({ label: coaches.length > 1 ? `Técnico ${i + 1}` : 'Técnico', name: coach.fullName }))
 
   return (
-    <View style={styles.peopleCol}>
-      <Text style={styles.peopleTeamName}>{teamName}</Text>
-      {rows.length === 0 && <Text style={{ color: ink[300] }}>Nenhum representante ou técnico cadastrado.</Text>}
-      {rows.map((row) => (
-        <View style={styles.signLine} key={row.label}>
-          <Text style={styles.signName}>{row.name}</Text>
-          <Text style={styles.signLabel}>{row.label} — assinatura</Text>
+    <View style={styles.teamSection}>
+      <View style={styles.teamSectionHeaderRow}>
+        {resolveTeamShield(team) && <Image style={styles.shieldSmall} src={absoluteUrl(resolveTeamShield(team))} />}
+        <Text style={styles.teamSectionTitle}>{team?.name ?? 'A DEFINIR'}</Text>
+      </View>
+
+      <View style={styles.rosterAreaRow}>
+        <View style={styles.rosterColumnsWrap}>
+          <RosterSubColumn players={colA} suspendedIds={suspendedIds} />
+          <RosterSubColumn players={colB} suspendedIds={suspendedIds} />
         </View>
-      ))}
+        <TeamEventsSideBox />
+      </View>
+
+      {people.length > 0 && (
+        <View style={styles.peopleRow}>
+          {people.map((person) => (
+            <View style={styles.peopleItem} key={person.label}>
+              <Text style={styles.peopleLabel}>{person.label} — assinatura</Text>
+              <View style={styles.peopleSignLine}>
+                <Text style={styles.peopleName}>{person.name}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
     </View>
   )
 }
@@ -251,43 +289,32 @@ export function MatchReportDocument({
 
         <View style={styles.extraRow}>
           <View style={styles.extraCol}>
-            <Text style={styles.extraLabel}>Disputa de pênaltis</Text>
-            <Text style={{ marginBottom: 4 }}>Houve pênaltis?   SIM ( )   NÃO ( )</Text>
+            <Text style={styles.extraLabel}>Pênaltis:</Text>
+            <Text style={{ fontSize: 6.5 }}>SIM ( )   NÃO ( )</Text>
             <View style={styles.extraLine}>
-              <Text>Se sim:</Text>
               <View style={styles.blankBox} />
-              <Text style={{ paddingTop: 3 }}>×</Text>
+              <Text style={{ fontSize: 7 }}>×</Text>
               <View style={styles.blankBox} />
             </View>
           </View>
           <View style={styles.extraCol}>
-            <Text style={styles.extraLabel}>Faltas cometidas</Text>
+            <Text style={styles.extraLabel}>Faltas:</Text>
             <View style={styles.extraLine}>
-              <Text>{nameA}:</Text>
+              <Text style={{ fontSize: 6.5 }}>{nameA}</Text>
               <View style={styles.blankBox} />
-              <Text>{nameB}:</Text>
+            </View>
+            <View style={styles.extraLine}>
+              <Text style={{ fontSize: 6.5 }}>{nameB}</Text>
               <View style={styles.blankBox} />
             </View>
           </View>
         </View>
 
-        <View style={styles.rostersRow}>
-          <Roster title={`ELENCO — ${nameA}`} players={playersA} suspendedIds={suspendedIds} />
-          <Roster title={`ELENCO — ${nameB}`} players={playersB} suspendedIds={suspendedIds} />
-        </View>
-
-        <View style={styles.eventsRow}>
-          <EventsTable title="GOLS" rows={10} />
-          <EventsTable title="CARTÕES" rows={8} />
-        </View>
+        <TeamSection team={teamA} players={playersA} coaches={coachesA} registration={registrationA} suspendedIds={suspendedIds} />
+        <TeamSection team={teamB} players={playersB} coaches={coachesB} registration={registrationB} suspendedIds={suspendedIds} />
 
         <View style={styles.obsBox}>
           <Text style={styles.obsLabel}>Observações da organização / arbitragem</Text>
-        </View>
-
-        <View style={styles.peopleRow}>
-          <PeopleSignatures teamName={nameA} registration={registrationA} coaches={coachesA} />
-          <PeopleSignatures teamName={nameB} registration={registrationB} coaches={coachesB} />
         </View>
 
         <View style={styles.refereeRow}>
