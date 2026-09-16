@@ -71,7 +71,6 @@ const styles = StyleSheet.create({
   cellCA: { width: '9.66%', borderRight: `0.5pt solid ${grid}` },
   cellCV: { width: '9.66%' },
   headText: { fontSize: 6, fontFamily: 'Helvetica-Bold', color: brand, textTransform: 'uppercase', textAlign: 'center', paddingVertical: 1 },
-  numBox: { width: 12, height: 8.5, border: `0.6pt solid ${ink[950]}`, borderRadius: 1.5 },
   playerName: { fontSize: 7 },
   playerNameSuspended: { fontSize: 7, color: '#b3261e', fontFamily: 'Helvetica-Bold' },
 
@@ -102,9 +101,7 @@ function TableHeader() {
 function PlayerRow({ player, suspended }: { player: Player; suspended: boolean }) {
   return (
     <View style={styles.tableRow}>
-      <View style={styles.cellNum}>
-        <View style={styles.numBox} />
-      </View>
+      <View style={styles.cellNum} />
       <View style={styles.cellSign} />
       <View style={styles.cellName}>
         <Text style={suspended ? styles.playerNameSuspended : styles.playerName}>
@@ -122,9 +119,7 @@ function PlayerRow({ player, suspended }: { player: Player; suspended: boolean }
 function WideInfoRow({ label }: { label: string }) {
   return (
     <View style={styles.tableRow}>
-      <View style={styles.cellNum}>
-        <View style={styles.numBox} />
-      </View>
+      <View style={styles.cellNum} />
       <View style={styles.cellSign} />
       <View style={styles.wideCell}>
         <Text style={styles.wideCellText}>{label}</Text>
