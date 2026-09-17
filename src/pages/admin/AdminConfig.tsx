@@ -7,7 +7,8 @@ import { Badge } from '../../components/ui/Badge'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { useToast } from '../../components/ui/Toast'
 import { subscribeConfig, updateConfig, DEFAULT_CONFIG } from '../../data/config'
-import type { ChampionshipConfig } from '../../types'
+import { subscribeTeams, updateTeam } from '../../data/teams'
+import type { ChampionshipConfig, Team } from '../../types'
 
 export default function AdminConfig() {
   const toast = useToast()
@@ -15,6 +16,8 @@ export default function AdminConfig() {
   const [form, setForm] = useState<ChampionshipConfig>(DEFAULT_CONFIG)
   const [saving, setSaving] = useState(false)
   const [toggleConfirm, setToggleConfirm] = useState(false)
+  const [teams, setTeams] = useState<Team[]>([])
+  const [togglingTeamId, setTogglingTeamId] = useState<string | null>(null)
 
   useEffect(
     () =>
@@ -24,6 +27,19 @@ export default function AdminConfig() {
       }),
     [],
   )
+  useEffect(() => subscribeTeams(setTeams), [])
+
+  async function handleTogglePlayersLocked(team: Team) {
+    setTogglingTeamId(team.id)
+    try {
+      await updateTeam(team.id, { playersLocked: !team.playersLocked })
+      toast.success(team.playersLocked ? `Cadastro de jogadores liberado para ${team.name}.` : `Cadastro de jogadores bloqueado para ${team.name}.`)
+    } catch {
+      toast.error('Não foi possível atualizar o bloqueio deste time.')
+    } finally {
+      setTogglingTeamId(null)
+    }
+  }
 
   async function handleSave() {
     setSaving(true)
@@ -69,6 +85,37 @@ export default function AdminConfig() {
               {config.registrationsOpen ? 'ENCERRAR INSCRIÇÕES' : 'REABRIR INSCRIÇÕES'}
             </Button>
           </div>
+        </div>
+      </Card>
+
+      <Card className="mb-6 p-6">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-ink-400">Bloqueio individual de cadastro de jogadores</h2>
+        <p className="mt-1 text-sm text-ink-500">
+          Bloqueia só o time escolhido, sem afetar os demais — diferente de "Encerrar inscrições", que vale pra todos de uma vez.
+        </p>
+        <div className="mt-4 divide-y divide-ink-100">
+          {teams.map((team) => (
+            <div key={team.id} className="flex items-center justify-between gap-4 py-3">
+              <div>
+                <p className="text-sm font-bold text-ink-900">{team.name}</p>
+                <p className="text-xs text-ink-400">{team.playerCount} jogador(es) cadastrado(s)</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge tone={team.playersLocked ? 'danger' : 'success'}>
+                  {team.playersLocked ? 'BLOQUEADO' : 'LIBERADO'}
+                </Badge>
+                <Button
+                  size="sm"
+                  variant={team.playersLocked ? 'primary' : 'danger'}
+                  loading={togglingTeamId === team.id}
+                  onClick={() => handleTogglePlayersLocked(team)}
+                >
+                  {team.playersLocked ? 'LIBERAR' : 'BLOQUEAR'}
+                </Button>
+              </div>
+            </div>
+          ))}
+          {teams.length === 0 && <p className="py-4 text-sm text-ink-400">Nenhum time cadastrado ainda.</p>}
         </div>
       </Card>
 

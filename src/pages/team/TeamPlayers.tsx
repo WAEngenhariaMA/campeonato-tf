@@ -50,7 +50,7 @@ export default function TeamPlayers() {
 
   const limit = config.playerLimit
   const atLimit = team.playerCount >= limit
-  const locked = !config.registrationsOpen
+  const locked = !config.registrationsOpen || team.playersLocked
 
   async function handleAdd(e: FormEvent) {
     e.preventDefault()
@@ -100,7 +100,13 @@ export default function TeamPlayers() {
     <div>
       <PageHeader
         title="JOGADORES"
-        subtitle={locked ? 'As inscrições estão encerradas — consulta apenas.' : 'Gerencie o elenco do seu time.'}
+        subtitle={
+          team.playersLocked
+            ? 'O cadastro de jogadores do seu time foi bloqueado pela organização — consulta apenas.'
+            : locked
+              ? 'As inscrições estão encerradas — consulta apenas.'
+              : 'Gerencie o elenco do seu time.'
+        }
       />
 
       {!locked && (

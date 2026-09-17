@@ -66,12 +66,13 @@ app.post('/api/teams', auth, admin, async (req, res) => {
 })
 app.patch('/api/teams/:id', auth, admin, async (req, res) => {
   const id = param(req, 'id')
-  const { name, shortName, login, active, shieldUrl, seed, primaryColor, secondaryColor } = req.body
+  const { name, shortName, login, active, playersLocked, shieldUrl, seed, primaryColor, secondaryColor } = req.body
   const patch: Record<string, unknown> = {}
   if (typeof name === 'string') patch.name = normalizeName(name)
   if (typeof shortName === 'string') patch.shortName = normalizeName(shortName)
   if (typeof login === 'string' && login.trim()) patch.login = login.trim().toLowerCase()
   if (typeof active === 'boolean') patch.active = active
+  if (typeof playersLocked === 'boolean') patch.playersLocked = playersLocked
   if (shieldUrl === null || typeof shieldUrl === 'string') patch.shieldUrl = shieldUrl
   if (seed === null || typeof seed === 'number') patch.seed = seed
   if (primaryColor === null || typeof primaryColor === 'string') patch.primaryColor = primaryColor

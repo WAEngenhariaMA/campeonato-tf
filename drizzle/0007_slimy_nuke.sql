@@ -1,0 +1,1 @@
+ALTER TABLE "teams" ADD COLUMN "players_locked" boolean DEFAULT false NOT NULL;

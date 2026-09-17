@@ -1,22 +1,36 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/Card'
+import { Button } from '../../components/ui/Button'
 import { Input, Select } from '../../components/ui/Input'
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { TableSkeleton } from '../../components/ui/Skeleton'
+import { useToast } from '../../components/ui/Toast'
 import { subscribeTeams } from '../../data/teams'
-import { listAllPlayers } from '../../data/players'
+import { subscribeConfig, DEFAULT_CONFIG } from '../../data/config'
+import { listAllPlayers, addPlayer, removePlayer, DuplicateDocumentError, LimitReachedError } from '../../data/players'
+import { maskCPF } from '../../lib/format'
 import { poll } from '../../lib/api'
-import type { Player, Team } from '../../types'
+import type { ChampionshipConfig, Player, Team } from '../../types'
 
 export default function AdminPlayers() {
+  const toast = useToast()
   const [teams, setTeams] = useState<Team[]>([])
   const [players, setPlayers] = useState<Player[]>([])
+  const [config, setConfig] = useState<ChampionshipConfig>(DEFAULT_CONFIG)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [teamFilter, setTeamFilter] = useState('')
   const [sortMode, setSortMode] = useState<'team' | 'name'>('team')
 
+  const [formTeamId, setFormTeamId] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [documentNumber, setDocumentNumber] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [removing, setRemoving] = useState<Player | null>(null)
+
   useEffect(() => subscribeTeams(setTeams), [])
+  useEffect(() => subscribeConfig(setConfig), [])
   useEffect(() => poll(listAllPlayers, (list) => { setPlayers(list); setLoading(false) }), [])
 
   const teamsById = useMemo(() => new Map(teams.map((t) => [t.id, t])), [teams])
@@ -36,9 +50,70 @@ export default function AdminPlayers() {
     })
   }, [players, teamFilter, search, sortMode, teamsById])
 
+  async function handleAdd(e: FormEvent) {
+    e.preventDefault()
+    const team = teamsById.get(formTeamId)
+    if (!team) {
+      toast.error('Selecione um time.')
+      return
+    }
+    setSubmitting(true)
+    try {
+      await addPlayer({ teamId: team.id, teamName: team.name, fullName, document: documentNumber, limit: config.playerLimit })
+      toast.success(`Jogador adicionado a ${team.name}.`)
+      setFullName('')
+      setDocumentNumber('')
+    } catch (err) {
+      if (err instanceof DuplicateDocumentError) {
+        toast.error('ESTE DOCUMENTO JÁ ESTÁ CADASTRADO EM OUTRA EQUIPE.')
+      } else if (err instanceof LimitReachedError) {
+        toast.error(err.message)
+      } else {
+        toast.error('Não foi possível adicionar o jogador.')
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleRemove() {
+    if (!removing) return
+    try {
+      await removePlayer({ playerId: removing.id, teamId: removing.teamId, documentNormalized: removing.documentNormalized })
+      toast.success('Jogador removido.')
+      setRemoving(null)
+    } catch {
+      toast.error('Não foi possível remover o jogador.')
+    }
+  }
+
   return (
     <div>
       <PageHeader title="JOGADORES" subtitle={`${players.length} jogadores cadastrados no campeonato.`} />
+
+      <Card className="mb-4 p-4">
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-400">Cadastrar jogador em qualquer time</h2>
+        <form onSubmit={handleAdd} className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
+          <Select label="Time" value={formTeamId} onChange={(e) => setFormTeamId(e.target.value)} required>
+            <option value="">Selecione o time...</option>
+            {teams.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </Select>
+          <Input label="Nome completo" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+          <Input
+            label="Documento"
+            hint="Opcional"
+            value={documentNumber}
+            onChange={(e) => setDocumentNumber(maskCPF(e.target.value))}
+          />
+          <Button type="submit" loading={submitting} className="h-fit">
+            ADICIONAR JOGADOR
+          </Button>
+        </form>
+      </Card>
 
       <Card className="mb-4 p-4">
         <div className="grid gap-3 sm:grid-cols-3">
@@ -72,6 +147,7 @@ export default function AdminPlayers() {
                   <th className="px-5 py-3">Jogador</th>
                   <th className="px-5 py-3">Documento</th>
                   <th className="px-5 py-3">Time</th>
+                  <th className="px-5 py-3 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -81,6 +157,11 @@ export default function AdminPlayers() {
                     <td className="px-5 py-3 font-semibold text-ink-900">{p.fullName}</td>
                     <td className="px-5 py-3 text-ink-500">{p.document || '—'}</td>
                     <td className="px-5 py-3 text-ink-500">{teamsById.get(p.teamId)?.name ?? p.teamId}</td>
+                    <td className="px-5 py-3 text-right">
+                      <Button size="sm" variant="danger" onClick={() => setRemoving(p)}>
+                        Remover
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -88,6 +169,16 @@ export default function AdminPlayers() {
           )}
         </div>
       </Card>
+
+      <ConfirmDialog
+        open={!!removing}
+        title="REMOVER JOGADOR"
+        message={`Tem certeza que deseja remover ${removing?.fullName} do time ${teamsById.get(removing?.teamId ?? '')?.name ?? ''}?`}
+        confirmLabel="REMOVER"
+        danger
+        onConfirm={handleRemove}
+        onCancel={() => setRemoving(null)}
+      />
     </div>
   )
 }

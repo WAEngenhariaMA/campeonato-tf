@@ -17,6 +17,8 @@ export const teams = pgTable('teams', {
   login: text('login').notNull().unique(), status: text('status').notNull().default('NAO_INICIADO'),
   seed: integer('seed'), primaryColor: text('primary_color'), secondaryColor: text('secondary_color'),
   active: boolean('active').notNull().default(true), representativesSubmitted: boolean('representatives_submitted').notNull().default(false),
+  /** Bloqueio individual: impede só esse time de cadastrar jogadores, sem afetar login/acesso nem outros times. */
+  playersLocked: boolean('players_locked').notNull().default(false),
   createdAt: createdAt(),
 })
 

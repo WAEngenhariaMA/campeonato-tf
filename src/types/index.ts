@@ -20,6 +20,8 @@ export interface Team {
   coachCount: number
   representativesSubmitted: boolean
   active: boolean
+  /** Bloqueio individual: impede só esse time de cadastrar jogadores. */
+  playersLocked: boolean
   createdAt: string
 }
 
