@@ -92,7 +92,7 @@ export function BracketView({
       <div className="flex min-w-max items-stretch gap-0 px-1">
         <Column
           title="PRIMEIRA FASE"
-          caption="5 jogos. Os 2 melhores vencedores avançam direto à semifinal."
+          caption="5 jogos do mata-mata + Cajueiro FC x Trevo (Jogo 6). Os 2 melhores vencedores do mata-mata avançam direto à semifinal."
           matches={primeira}
           teamsById={teamsById}
           onSelect={onSelect}
@@ -100,7 +100,7 @@ export function BracketView({
         <FlowDivider />
         <Column
           title="PLAYOFF"
-          caption="3º, 4º e 5º melhores vencedores + melhor perdedor disputam 2 vagas."
+          caption="3º, 4º e 5º melhores vencedores + vencedor de Cajueiro FC x Trevo disputam 2 vagas."
           matches={playoff}
           teamsById={teamsById}
           onSelect={onSelect}

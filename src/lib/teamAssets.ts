@@ -15,6 +15,8 @@ const SHIELD_FILES: Record<string, string> = {
   realbets: 'real-bets.png',
   athleticocohatrac: 'athletico-cohatrac.jpg',
   tottenham: 'tottenham.png',
+  cajueirofc: 'cajueiro-fc.png',
+  trevo: 'trevo.png',
 }
 
 /** minúsculas, sem acento, só [a-z0-9] — mesma normalização usada nas duas pontas da comparação. */

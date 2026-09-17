@@ -33,11 +33,15 @@ export function calculateLoserRanking(entries: RankingEntry[]) {
   return [...entries].sort((a, b) => Number(b.lostOnPenalties) - Number(a.lostOnPenalties) || byStats(a, b))
 }
 
-/** Agenda oficial fornecida pela organização; equipes são preenchidas pelo sorteio/cadastro administrativo. */
+/**
+ * Agenda oficial fornecida pela organização; equipes são preenchidas pelo sorteio/cadastro
+ * administrativo. J6 é o confronto Cajueiro FC x Trevo: seu vencedor ocupa a 4ª vaga do playoff
+ * no lugar do antigo "melhor perdedor" (ver tournamentSnapshot em server/index.ts).
+ */
 export const officialSchedule = [
   ['J1', 'PRIMEIRA_FASE', '2026-09-16', '19:45'], ['J2', 'PRIMEIRA_FASE', '2026-09-16', '20:45'], ['J3', 'PRIMEIRA_FASE', '2026-09-16', '21:45'],
-  ['J4', 'PRIMEIRA_FASE', '2026-09-18', '19:45'], ['J5', 'PRIMEIRA_FASE', '2026-09-18', '20:45'],
-  ['J6', 'PLAYOFF', '2026-09-20', '08:15'], ['J7', 'PLAYOFF', '2026-09-20', '09:15'],
-  ['J8', 'SEMIFINAL', '2026-09-25', '19:45'], ['J9', 'SEMIFINAL', '2026-09-25', '20:45'],
-  ['J10', 'TERCEIRO_LUGAR', '2026-09-27', '08:15'], ['J11', 'FINAL', '2026-09-27', '09:30'],
+  ['J4', 'PRIMEIRA_FASE', '2026-09-18', '19:45'], ['J5', 'PRIMEIRA_FASE', '2026-09-18', '20:45'], ['J6', 'PRIMEIRA_FASE', null, null],
+  ['J7', 'PLAYOFF', '2026-09-20', '08:15'], ['J8', 'PLAYOFF', '2026-09-20', '09:15'],
+  ['J9', 'SEMIFINAL', '2026-09-25', '19:45'], ['J10', 'SEMIFINAL', '2026-09-25', '20:45'],
+  ['J11', 'TERCEIRO_LUGAR', '2026-09-27', '08:15'], ['J12', 'FINAL', '2026-09-27', '09:30'],
 ] as const

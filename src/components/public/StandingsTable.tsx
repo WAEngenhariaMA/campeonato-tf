@@ -5,7 +5,6 @@ import type { Standing, Team } from '../../types'
 const situationTone = (s: string) =>
   s === 'SEMIFINAL' ? 'bg-emerald-100 text-emerald-800'
   : s === 'PLAYOFF' ? 'bg-amber-100 text-amber-800'
-  : s === 'MELHOR PERDEDOR' ? 'bg-blue-100 text-blue-800'
   : s === 'ELIMINADO' ? 'bg-red-100 text-red-800'
   : 'bg-slate-100 text-slate-600'
 

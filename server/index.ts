@@ -242,16 +242,25 @@ async function tournamentSnapshot() {
   // A classificação geral usa exatamente a mesma regra do mata-mata (8 critérios) — o campeonato
   // inteiro é eliminatório, então não faz sentido ter uma régua diferente pra "fase de grupos".
   const losers = calculateLoserRanking(rankingInput.filter((entry) => completedFirst.some((match) => match.teamAId === entry.teamId || match.teamBId === entry.teamId) && !winners.some((winner) => winner.teamId === entry.teamId)))
-  const bestLoser = losers[0] ?? null
+  // J6 (Cajueiro FC x Trevo) substitui o "melhor perdedor": seu vencedor sempre ocupa a 4ª vaga do
+  // playoff (nunca disputa a vaga direta de semifinal), e seu perdedor é eliminado — não entra na
+  // disputa dos 3º/4º/5º melhores vencedores do mata-mata original (J1 a J5).
+  const decider = completedFirst.find((match) => match.matchNumber === 'J6')
+  const bracketWinners = winners.filter((winner) => !decider || winner.teamId !== decider.winnerTeamId)
+  const bracketMatchesDone = completedFirst.filter((match) => match.matchNumber !== 'J6').length
   const situation = new Map<string, string>()
-  if (completedFirst.length === 5) { winners.forEach((winner, index) => situation.set(winner.teamId, index < 2 ? 'SEMIFINAL' : 'PLAYOFF')); if (bestLoser) situation.set(bestLoser.teamId, 'MELHOR PERDEDOR'); for (const entry of losers) if (entry.teamId !== bestLoser?.teamId) situation.set(entry.teamId, 'ELIMINADO') }
+  if (bracketMatchesDone === 5) { bracketWinners.forEach((winner, index) => situation.set(winner.teamId, index < 2 ? 'SEMIFINAL' : 'PLAYOFF')); for (const entry of losers) situation.set(entry.teamId, 'ELIMINADO') }
+  if (decider) {
+    situation.set(decider.winnerTeamId!, 'PLAYOFF')
+    situation.set(decider.winnerTeamId === decider.teamAId ? decider.teamBId! : decider.teamAId!, 'ELIMINADO')
+  }
   // Times que ainda não jogaram a primeira fase: sem estatística pra ordenar, ficam depois dos que já jogaram.
   const rankedIds = new Set([...winners, ...losers].map((entry) => entry.teamId))
   const notPlayed = [...values.values()].filter((item) => !rankedIds.has(item.team.id)).sort((a, b) => a.team.name.localeCompare(b.team.name))
   const orderedIds = [...winners.map((w) => w.teamId), ...losers.map((l) => l.teamId), ...notPlayed.map((n) => n.team.id)]
   const standings: Standing[] = orderedIds.map((teamId, index) => {
     const item = values.get(teamId)!
-    return { position: index + 1, teamId, teamName: item.team.name, games: item.games, wins: item.wins, losses: item.losses, points: item.wins * 3, goalsFor: item.goalsFor, goalsAgainst: item.goalsAgainst, goalDifference: item.goalsFor - item.goalsAgainst, yellowCards: item.yellowCards, redCards: item.redCards, fouls: item.fouls, situation: situation.get(teamId) ?? (completedFirst.length === 5 ? 'ELIMINADO' : 'EM DISPUTA') }
+    return { position: index + 1, teamId, teamName: item.team.name, games: item.games, wins: item.wins, losses: item.losses, points: item.wins * 3, goalsFor: item.goalsFor, goalsAgainst: item.goalsAgainst, goalDifference: item.goalsFor - item.goalsAgainst, yellowCards: item.yellowCards, redCards: item.redCards, fouls: item.fouls, situation: situation.get(teamId) ?? (bracketMatchesDone === 5 ? 'ELIMINADO' : 'EM DISPUTA') }
   })
   const disciplinary = [...new Map(allPlayers.map((player) => [player.id, player])).values()].map((player) => {
     const playerCards = allCards.filter((card) => card.playerId === player.id)
@@ -260,7 +269,7 @@ async function tournamentSnapshot() {
     return { playerId: player.id, playerName: player.fullName, teamId: player.teamId, teamName: teamName.get(player.teamId) ?? '', yellowCards, redCards: playerCards.filter((card) => card.cardType === 'VERMELHO').length, suspensionMatches }
   }).filter((player) => player.suspensionMatches > 0 || player.yellowCards >= 2)
   const history = allMatches.filter((match) => match.status === 'ENCERRADO' || match.status === 'WO').map((match) => ({ matchId: match.id, goals: allGoals.filter((goal) => goal.matchId === match.id).map((goal) => ({ ...goal, playerName: playerName.get(goal.playerId) ?? 'Jogador', teamName: teamName.get(goal.teamId) ?? '' })), cards: allCards.filter((card) => card.matchId === match.id).map((card) => ({ ...card, playerName: playerName.get(card.playerId) ?? 'Jogador', teamName: teamName.get(card.teamId) ?? '' })) }))
-  return { matches: allMatches, standings, firstPhaseFinished: completedFirst.length === 5, disciplinary, history }
+  return { matches: allMatches, standings, firstPhaseFinished: completedFirst.length === 6, disciplinary, history }
 }
 app.get('/api/tournament', async (_req, res) => res.json(await tournamentSnapshot()))
 app.get('/api/standings', auth, async (_req, res) => res.json((await tournamentSnapshot()).standings))
